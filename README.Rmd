@@ -8,6 +8,9 @@ output: github_document
 [![Codecov test coverage](https://codecov.io/gh/moodymudskipper/nakedpipe/branch/master/graph/badge.svg)](https://codecov.io/gh/moodymudskipper/nakedpipe?branch=master)
 <!-- badges: end -->
 
+# nakedpipe <img src='man/figures/logo.png' align="right" height="139" />
+
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -16,8 +19,6 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-
-# nakedpipe
 
 Pipe into a sequence of calls without repeating the pipe symbol.
 

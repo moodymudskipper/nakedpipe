@@ -9,7 +9,7 @@ status](https://travis-ci.org/moodymudskipper/nakedpipe.svg?branch=master)](http
 coverage](https://codecov.io/gh/moodymudskipper/nakedpipe/branch/master/graph/badge.svg)](https://codecov.io/gh/moodymudskipper/nakedpipe?branch=master)
 <!-- badges: end -->
 
-# nakedpipe
+# nakedpipe <img src='man/figures/logo.png' align="right" height="139" />
 
 Pipe into a sequence of calls without repeating the pipe symbol.
 
@@ -68,9 +68,9 @@ bench::mark(iterations = 10000,
 #> # A tibble: 3 x 6
 #>   expression      min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 %>%          97.6us  108.9us     8746.   119.5KB     18.4
-#> 2 %.%          37.4us   40.6us    22979.        0B     18.4
-#> 3 %..%         16.6us   18.6us    50293.    24.1KB     20.1
+#> 1 %>%          98.3us  125.2us     6988.   119.5KB     14.7
+#> 2 %.%          37.3us   43.7us    21483.        0B     17.2
+#> 3 %..%         16.7us   20.2us    46960.    24.1KB     18.8
 ```
 
 The package is written around the good parts of my *fastpipe*
