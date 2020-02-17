@@ -26,7 +26,6 @@ insert_dot <- function(expr) {
 #' @param x object to pipe in
 #' @param expr sequence of calls wrapped inside `{}`
 #'
-#' @return
 #' @export
 #'
 #' @examples

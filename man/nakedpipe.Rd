@@ -14,9 +14,6 @@ x \%..\% expr
 
 \item{expr}{sequence of calls wrapped inside `{}`}
 }
-\value{
-
-}
 \description{
 Pipe into a sequence of calls, without repeating the pipe symbol
 }
