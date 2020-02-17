@@ -1,5 +1,5 @@
 Package: nakedpipe
-Title: Pipe Into a Sequence of Calls Without Repeating the Pipe Symbol.
+Title: Pipe Into a Sequence of Calls Without Repeating the Pipe Symbol
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Antoine",
@@ -15,4 +15,5 @@ URL: https://github.com/moodymudskipper/nakedpipe
 BugReports: https://github.com/moodymudskipper/nakedpipe/issues
 Suggests: 
     testthat (>= 2.1.0),
-    covr
+    covr,
+    dplyr
