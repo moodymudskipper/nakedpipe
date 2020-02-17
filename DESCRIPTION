@@ -13,3 +13,6 @@ LazyData: true
 RoxygenNote: 7.0.2
 URL: https://github.com/moodymudskipper/nakedpipe
 BugReports: https://github.com/moodymudskipper/nakedpipe/issues
+Suggests: 
+    testthat (>= 2.1.0),
+    covr

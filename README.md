@@ -1,5 +1,13 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- badges: start -->
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![Travis build
+status](https://travis-ci.org/moodymudskipper/nakedpipe.svg?branch=master)](https://travis-ci.org/moodymudskipper/nakedpipe)
+[![Codecov test
+coverage](https://codecov.io/gh/moodymudskipper/nakedpipe/branch/master/graph/badge.svg)](https://codecov.io/gh/moodymudskipper/nakedpipe?branch=master)
+<!-- badges: end -->
 
 # nakedpipe
 
@@ -60,9 +68,9 @@ bench::mark(iterations = 10000,
 #> # A tibble: 3 x 6
 #>   expression      min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 %>%         131.5us  140.5us     6714.   119.5KB     14.1
-#> 2 %.%          49.6us   54.8us    15396.        0B     12.3
-#> 3 %..%         23.2us   25.4us    32770.    18.3KB     13.1
+#> 1 %>%          97.6us  108.9us     8746.   119.5KB     18.4
+#> 2 %.%          37.4us   40.6us    22979.        0B     18.4
+#> 3 %..%         16.6us   18.6us    50293.    24.1KB     20.1
 ```
 
 The package is written around the good parts of my *fastpipe*
