@@ -30,6 +30,18 @@ insert_dot <- function(expr) {
 #' @export
 #'
 #' @examples
+#' # Pipe into a sequence of calls using `%.%`
+#' cars %.% {
+#'   head(2)
+#'   transform(time = dist/speed)
+#' }
+#'
+#' # `%..%` is faster at the cost of using explicit dots
+#' cars %..% {
+#'   head(.,2)
+#'   transform(.,time = dist/speed)
+#' }
+#'
 #' # the naked pipe plays well with left to right assignment
 #' cars %.% {
 #'   head(2)

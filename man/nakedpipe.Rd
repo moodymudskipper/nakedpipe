@@ -28,6 +28,18 @@ If you want to be even faster, use `%..%` and use
 explicit dots (though keep in mind these are micro seconds!)
 }
 \examples{
+# Pipe into a sequence of calls using `\%.\%`
+cars \%.\% {
+  head(2)
+  transform(time = dist/speed)
+}
+
+# `\%..\%` is faster at the cost of using explicit dots
+cars \%..\% {
+  head(.,2)
+  transform(.,time = dist/speed)
+}
+
 # the naked pipe plays well with left to right assignment
 cars \%.\% {
   head(2)
