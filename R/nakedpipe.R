@@ -53,7 +53,8 @@ insert_dot <- function(expr) {
   expr <- substitute(expr)
   if (identical(expr[[1]], quote(`{`))) expr <- as.list(substitute(expr)[-1])
   args <- c(list(x), expr)
-  Reduce(function(x,y) eval(insert_dot(y), envir = list(. = x), enclos = parent.frame()), args)
+  pf <- parent.frame()
+  Reduce(function(x,y) eval(insert_dot(y), envir = list(. = x), enclos = pf), args)
 }
 
 #' @export
@@ -62,5 +63,6 @@ insert_dot <- function(expr) {
   expr <- substitute(expr)
   if (identical(expr[[1]], quote(`{`))) expr <- as.list(substitute(expr)[-1])
   args <- c(list(x), expr)
-  Reduce(function(x,y) eval(y, envir = list(. = x), enclos = parent.frame()), args)
+  pf <- parent.frame()
+  Reduce(function(x,y) eval(y, envir = list(. = x), enclos = pf), args)
 }
