@@ -1,0 +1,69 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# nakedpipe
+
+Pipe into a sequence of calls without repeating the pipe symbol.
+
+This is inspired by Stefan Bache and Hadley Wickham's *magrittr* pipe and behaves consistently, though it doesn't use its code. 
+
+The package is very light (20 lines of code + doc).
+
+Install with :
+
+``` r
+remotes::install_github("moodymudskipper/nakedpipe")
+```
+
+## Example
+
+```{r}
+library(nakedpipe)
+cars %.% {
+  head(2)
+  transform(time = dist/speed)
+} -> res
+res
+```
+
+## Benchmark
+
+We're a bit faster than *magrittr*, if you want to be even faster, use `%..%` and use
+explicit dots (though keep in mind these are micro seconds!):
+
+```{r}
+bench::mark(iterations = 10000,
+  `%>%` = cars %>% 
+    identity %>%
+    identity() %>%
+    identity(.) %>%
+    {identity(.)},
+  `%.%` = cars %.% {
+    identity
+    identity()
+    identity(.)
+    {identity(.)}
+  },
+  `%..%` = cars %..% {
+    identity(.)
+    identity(.)
+    identity(.)
+    {identity(.)}
+   }
+)
+```
+
+The package is written around the good part of may *fastpipe* experiment. I could
+have included it there but I'd rather not override `%>%`.
