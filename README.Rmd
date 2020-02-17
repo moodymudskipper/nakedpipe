@@ -19,7 +19,7 @@ Pipe into a sequence of calls without repeating the pipe symbol.
 
 This is inspired by Stefan Bache and Hadley Wickham's *magrittr* pipe and behaves consistently, though it doesn't use its code. 
 
-The package is very light (20 lines of code + doc).
+The package is very light (25 lines of code + doc).
 
 Install with :
 
@@ -40,10 +40,11 @@ res
 
 ## Benchmark
 
-We're a bit faster than *magrittr*, if you want to be even faster, use `%..%` and use
+We're a bit faster than *magrittr*, if you want to be even faster use `%..%` with
 explicit dots (though keep in mind these are micro seconds!):
 
 ```{r}
+library(magrittr)
 bench::mark(iterations = 10000,
   `%>%` = cars %>% 
     identity %>%
@@ -65,5 +66,5 @@ bench::mark(iterations = 10000,
 )
 ```
 
-The package is written around the good part of may *fastpipe* experiment. I could
+The package is written around the good parts of my *fastpipe* experiment. I could
 have included it there but I'd rather not override `%>%`.
