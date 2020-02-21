@@ -24,7 +24,9 @@ Pipe into a sequence of calls without repeating the pipe symbol.
 
 This is inspired by Stefan Bache and Hadley Wickham's *magrittr* pipe and behaves consistently, though it doesn't use its code. 
 
-The package is very light (25 lines of code + doc).
+The approach of *nakedpipe* spares typing and visual space, the package also
+proposes some convenient logging and debugging features and is a bit more
+performant than its dressed counterpart.
 
 Install with :
 
@@ -32,21 +34,169 @@ Install with :
 remotes::install_github("moodymudskipper/nakedpipe")
 ```
 
-## Example
+## Examples
 
 ```{r}
 library(nakedpipe)
-cars %.% {
-  head(2)
-  transform(time = dist/speed)
-} -> res
-res
 ```
+
+Pipe into a sequence of calls using `%.%`
+
+```{r}
+cars %.% {
+ head(2)
+ transform(time = dist/speed)
+}
+```
+
+It plays well with left to right assignment
+
+```{r}
+cars %.% {
+ head(2)
+ transform(time = dist/speed)
+} -> res
+```
+
+Use `~~` for side effects
+
+```{r}
+cars %.% {
+ head(2)
+ ~~ message("nrow:", nrow(.))
+ transform(time = dist/speed)
+}
+```
+
+This include assignments
+
+```{r}
+cars %.% {
+ head(2)
+ ~~ cars_h <- .
+ transform(time = dist/speed)
+}
+cars_h
+```
+
+Assign in place using `%<.%`
+
+```{r}
+cars_copy <- cars
+cars_copy %<.% {
+ head(2)
+ ~~ message("nrow:", nrow(.))
+ transform(time = dist/speed)
+}
+cars_copy
+```
+
+Clock each step using `%L.%`
+
+```{r}
+cars %L.% {
+ head(2)
+ ~~ Sys.sleep(1)
+ transform(time = dist/speed)
+}
+```
+
+`%..%` is faster at the cost of using explicit dots
+
+```{r}
+cars %..% {
+ head(.,2)
+ transform(.,time = dist/speed)
+}
+```
+
+It is better suited for programming and doesn't support side effect notation
+but you can do :
+
+```{r}
+cars %..% {
+ head(.,2)
+  {message("nrow:", nrow(.)); .}
+ transform(.,time = dist/speed)
+}
+```
+
+## Debugging
+
+The `%D.%` pipe allows you to step through the calls one by one.
+
+```{r, eval = FALSE}
+# Debug the pipe using `%D.%`
+cars %D.% {
+ head(2)
+ transform(time = dist/speed)
+}
+```
+
+You could also inster a browser() call as a side effect at a chosen step.
+
+```{r, eval = FALSE}
+# Debug the pipe using `%D.%`
+cars %D.% {
+ head(2)
+ ~~ browser()
+ transform(time = dist/speed)
+}
+```
+
+## *ggplot2*
+
+It's a little known trick that you can use *magrittr*'s pipe with *ggplot2* if you pipe
+to the `+` symbol. It is convenient if you want to use the ggplot object
+as the input of another function without intermediate variables of bracket
+overload :
+
+```{r, eval = FALSE}
+library(ggplot2)
+path <- tempfile()
+cars %>%
+  head() %>% 
+  ggplot(aes(speed, dist)) %>%
+  + geom_point() %>%
+  + ggtitle("head(cars)") %>%
+  saveRDS(path)
+
+# rather than 
+plt <- cars %>%
+  head() %>% 
+  ggplot(aes(speed, dist)) + 
+  geom_point() +
+  ggtitle("head(cars)")
+saveRDS(plt, path)
+```
+
+The former case above shows operators on both sides, which looks a bit complicated,
+the latter requires a temporary variable and we must look at the end of the
+previous line to know what kind of piping was done.
+
+In both cases additionally if I chose to comment out the `ggtitle("head(cars)")` line, I should
+also comment the last operator at the end of the previous line.
+
+With *nakedpipe* we can write :
+
+```{r, eval = FALSE}
+cars %.% {
+  head()
+  ggplot(aes(speed, dist))
+  + geom_point()
+  + ggtitle("head(cars)")
+  saveRDS(path)
+}
+```
+
+`+` signs are neatly alligned, it's obvious where the *ggplot* chain starts and
+ends, and trivial to pipe it to another instruction or to comment a line.
 
 ## Benchmark
 
 We're a bit faster than *magrittr*, if you want to be even faster use `%..%` with
-explicit dots (though keep in mind these are micro seconds!):
+explicit dots, though keep in mind these are micro seconds and that the fastest
+solution is always not to use pipes at all.
 
 ```{r}
 library(magrittr)
@@ -67,9 +217,41 @@ bench::mark(iterations = 10000,
     identity(.)
     identity(.)
     {identity(.)}
+   },
+  `base` = {
+    . <- cars
+    . <- identity(.)
+    . <- identity(.)
+    . <- identity(.)
+    . <- identity(.)
    }
 )
 ```
 
-The package is written around the good parts of my *fastpipe* experiment. I could
-have included it there but I'd rather not override `%>%`.
+## Snippets
+
+Runing `setup_nakedpipe_snippets()` will open RStudio's snippet file so you
+can add our suggested snippets there. Follow the instructions and you'll be able to type :
+
+```{r, eval = FALSE}
+cars . # + 2 time the <tab> key
+```
+
+and display : 
+
+```{r, eval = FALSE}
+cars %.% {
+  # with the cursor conveniently placed here
+}
+```
+
+(or type `..` to get the `%..%` equivalent)
+
+## Similar efforts
+
+*nakedpipe* is heavily inspired by *magrittr* and follows the same dot insertion
+rules.
+
+Alternative pipes are available on *CRAN*, at the time of writing and to my knowlege,
+in packages *wrapr* and *pipeR*. The latter includes a function `pipeline()` that
+allows piping a sequence of calls in a similar fashion as *nakedpipe*

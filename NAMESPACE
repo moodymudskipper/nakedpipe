@@ -2,3 +2,12 @@
 
 export("%.%")
 export("%..%")
+export("%<.%")
+export("%<..%")
+export("%<L.%")
+export("%D.%")
+export("%L.%")
+export(setup_nakedpipe_snippets)
+export(side_effect)
+importFrom(utils,file.edit)
+importFrom(utils,writeClipboard)
