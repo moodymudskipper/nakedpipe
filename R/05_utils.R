@@ -1,4 +1,4 @@
-#' @importFrom utils file.edit writeClipboard
+#' @importFrom utils file.edit
 NULL
 
 insert_dot <- function(expr) {
