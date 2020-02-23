@@ -50,3 +50,37 @@ has_dbl_tilde <- function(y) {
     is.call(y[[2]]) && identical(y[[c(2,1)]], quote(`~`)) &&
     length(y[[2]] == 2)
 }
+
+writeToClipboard  <- function(x) {
+  ## from pacman package
+
+  OS <- Sys.info()["sysname"]
+
+  if (!(OS %in% c("Darwin", "Windows", "Linux"))) {
+    stop("Copying to clipboard not supported on your OS")
+  }
+
+  if (OS != "Windows") {
+    writeClipboard <- NULL
+  }
+
+  switch(
+    OS,
+    "Darwin" = {j <- pipe("pbcopy", "w")
+    writeLines(x, con = j)
+    close(j)
+    },
+    "Windows" = writeClipboard(x, format = 1),
+    "Linux" = {
+      if (Sys.which("xclip") == "") {
+        warning("Clipboard on Linux requires 'xclip'. Try using:\nsudo apt-get install xclip")
+      }
+      con <- pipe("xclip -i", "w")
+      writeLines(x, con = con)
+      close(con)
+    }
+  )
+}
+
+
+
