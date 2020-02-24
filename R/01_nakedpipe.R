@@ -25,7 +25,7 @@
 #' assigns the result back to the input variable.
 #'
 #' @param x object to pipe in
-#' @param expr sequence of calls wrapped inside `{}`
+#' @param expr call or sequence of calls wrapped inside `{}`
 #'
 #'
 #' @examples

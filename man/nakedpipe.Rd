@@ -28,7 +28,7 @@ x \%D.\% expr
 \arguments{
 \item{x}{object to pipe in}
 
-\item{expr}{sequence of calls wrapped inside \code{{}}}
+\item{expr}{call or sequence of calls wrapped inside \code{{}}}
 }
 \description{
 Pipe into a sequence of calls, without repeating the pipe symbol.
