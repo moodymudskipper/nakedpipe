@@ -51,8 +51,29 @@ eval_step <-   fun <- function(input, expr, pf) {
     list2env(x = as.list(env), envir = pf)
     return(input)
   }
+
+  if (has_if(expr)) {
+    cond <- eval(expr[[2]], envir = list(. = input), enclos = pf)
+    if(cond) {
+      res <- eval(insert_dot(expr[[3]]), envir = list(. = input), enclos = pf)
+      return(res)
+    } else {
+      if(length(expr) == 4) {
+        res <- eval(insert_dot(expr[[4]]), envir = list(. = input), enclos = pf)
+      } else {
+        res <- input
+      }
+    }
+    return(res)
+  }
+
   eval(insert_dot(expr), envir = list(. = input), enclos = pf)
 }
+
+has_if <- function(expr) {
+  is.call(expr) && identical(expr[[1]], quote(`if`))
+}
+
 
 has_assignment_op <- function(expr) {
   is.call(expr) && (

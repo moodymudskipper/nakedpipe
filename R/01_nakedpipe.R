@@ -23,6 +23,9 @@
 #'
 #' The prefix `~~` can be used with any of the above for side effects.
 #'
+#' We can have conditional steps using `if` `else` statements, the condition can
+#' use the dot and if no else clause is given the input will be returned.
+#'
 #' - `%..%` requires explicit dots and is faster and more adapted to programming,
 #' it doesn't support `~~`. It's the bare version of `%.%`, which makes it the
 #' **bare-naked pipe**.

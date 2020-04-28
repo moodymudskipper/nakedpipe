@@ -199,3 +199,14 @@ test_that("debug pipe works", {
   expect_identical(x, head(cars, 2))
 })
 
+test_that("if usage works", {
+  expect_identical(
+    letters %.% {if(length(.) > 3) head() else tail()},
+      head(letters))
+  expect_identical(
+    letters %.% {if(length(.) < 3) head() else tail()},
+      tail(letters))
+  expect_identical(
+      letters %.% {if(length(.) < 3) head()},
+      letters)
+})
