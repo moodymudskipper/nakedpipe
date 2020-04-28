@@ -1,6 +1,7 @@
 #' @importFrom utils file.edit
 NULL
 
+# insert dot at the relevant place following magrittr conventions
 insert_dot <- function(expr) {
   if (is.symbol(expr) || expr[[1]] == quote(`(`)) {
     # if a symbol or an expression inside parentheses, make it a call with dot arg
@@ -16,26 +17,41 @@ insert_dot <- function(expr) {
   expr
 }
 
-eval_step <-   fun <- function(x,y, pf) {
-  if (has_assignment_op(y)) {
-    if (!has_dbl_tilde(y[[2]]))
+# evaluate a single step given an output and expression, dealing with side effects
+# and assignments
+eval_step <-   fun <- function(input, expr, pf) {
+
+  if (has_assignment_op(expr)) {
+    # assignment can only be used with `~~`
+    # wether `~~` is used or not, assignment is on top of the tree due to precedence
+    # so some juggling is required, indeed
+    # `~~ a <- b` is `"<-"(~~ a, b)` and
+    # `~~ a -> b` is `"<-"(b, ~~ a)`
+
+    env <- new.env()
+    env$. <- input
+    # remove double tilde from call before evaluation
+    if (has_dbl_tilde(expr[[2]])) {
+      expr[[2]] <- expr[[c(2,2,2)]]
+    } else if (has_dbl_tilde(expr[[3]])) {
+      expr[[3]] <- expr[[c(3,2,2)]]
+    } else {
       stop("Wrong syntax! If you mean to assign as a side effect you should",
            "use a `~~` prefix")
-    env <- new.env()
-    env$. <- x
-    y[[2]] <- y[[c(2,2,2)]]
-    eval(y, envir = env, enclos = pf)
+    }
+    eval(expr, envir = env, enclos = pf)
     list2env(x = as.list(env), envir = pf)
-    return(x)
+    return(input)
   }
-  if (has_dbl_tilde(y)) {
+  if (has_dbl_tilde(expr)) {
     env <- new.env()
-    env$. <- x
-    eval(y[[c(2,2)]], envir = env, enclos = pf)
+    env$. <- input
+    # evaluate expression past the tilde
+    eval(expr[[c(2,2)]], envir = env, enclos = pf)
     list2env(x = as.list(env), envir = pf)
-    return(x)
+    return(input)
   }
-  eval(insert_dot(y), envir = list(. = x), enclos = pf)
+  eval(insert_dot(expr), envir = list(. = input), enclos = pf)
 }
 
 has_assignment_op <- function(expr) {

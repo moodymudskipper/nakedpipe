@@ -93,6 +93,13 @@ test_that("side effects work", {
   }
   expect_identical(x, head(cars, 2))
 
+  cars %.% {
+    head(2)
+    ~~ . -> x
+    transform(time = dist/speed)
+  }
+  expect_identical(x, head(cars, 2))
+
   expect_error(  cars %.% {
     head(2)
     ~ x <- 3
