@@ -8,13 +8,13 @@
 #' - `%.%` is the main pipe, called **naked pipe**, by contrast to the traditional
 #'   more verbose *magrittr* pipe.
 #' - `%<.%` is the **assignment pipe**, it works like `%.%` but
-#'   assigns the result back to the input variable..
+#'   assigns the result back to the input variable.
 #' - `%L.%` is the **logging pipe**, it works like `%.%`logs to the console the
 #'   calls and their execution times.
 #' - `%<L.%` is the **logging assignment pipe**, it combines the two latter.
 #' - `%D.%` is the **debugging pipe**, is used to go through the pipe step by
 #'   step, it gives the  same output as the standard `%.%` pipe. See also
-#'   `?side_effect`
+#'   `?side_effect`.
 #'
 #' The prefix `~~` can be used with any of the above for side effects.
 #'
