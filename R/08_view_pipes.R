@@ -2,7 +2,7 @@
 #' @rdname nakedpipe
 `%V.%` <- function(x, expr) {
   header <- deparse(substitute(x))
-  header[length(header)] <- paste(header[length(header)],  "%P.% {")
+  header[length(header)] <- paste(header[length(header)],  "%V.% {")
   lapply(header, message)
   pf <- parent.frame()
   expr <- substitute(expr)
@@ -25,7 +25,7 @@
 #' @rdname nakedpipe
 `%<V.%` <- function(x, expr) {
   header <- deparse(substitute(x))
-  header[length(header)] <- paste(header[length(header)],  "%<P.% {")
+  header[length(header)] <- paste(header[length(header)],  "%<V.% {")
   lapply(header, message)
   pf <- parent.frame()
   expr <- substitute(expr)
