@@ -9,9 +9,14 @@
 #'   more verbose *magrittr* pipe.
 #' - `%<.%` is the **assignment pipe**, it works like `%.%` but
 #'   assigns the result back to the input variable.
-#' - `%L.%` is the **logging pipe**, it works like `%.%`logs to the console the
+#' - `%L.%` is the **logging pipe**, it works like `%.%` but logs to the console the
 #'   calls and their execution times.
-#' - `%<L.%` is the **logging assignment pipe**, it combines the two latter.
+#' - `%P.%` is the **printing pipe**, it works like `%.%` but prints the output
+#'   of each step to the console.
+#' - `%V.%` is the **viewing pipe**, it works like `%.%` but calls `View()` on
+#'   the output of each step.
+#'   calls and their execution times.
+#' - `%<L.%`, `%<P.%` and `%<V.%` are assigning counterparts of the pipes described above.
 #' - `%D.%` is the **debugging pipe**, is used to go through the pipe step by
 #'   step, it gives the  same output as the standard `%.%` pipe. See also
 #'   `?side_effect`.

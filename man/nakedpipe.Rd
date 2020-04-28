@@ -40,13 +40,13 @@ behaves consistently, though it doesn't use its code.
 \item \verb{\%.\%} is the main pipe, called \strong{naked pipe}, by contrast to the traditional
 more verbose \emph{magrittr} pipe.
 \item \verb{\%<.\%} is the \strong{assignment pipe}, it works like \verb{\%.\%} but
-assigns the result back to the input variable..
+assigns the result back to the input variable.
 \item \verb{\%L.\%} is the \strong{logging pipe}, it works like \verb{\%.\%}logs to the console the
 calls and their execution times.
 \item \verb{\%<L.\%} is the \strong{logging assignment pipe}, it combines the two latter.
 \item \verb{\%D.\%} is the \strong{debugging pipe}, is used to go through the pipe step by
 step, it gives the  same output as the standard \verb{\%.\%} pipe. See also
-\code{?side_effect}
+\code{?side_effect}.
 }
 
 The prefix \verb{~~} can be used with any of the above for side effects.
