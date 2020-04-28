@@ -229,4 +229,12 @@ test_that("functionals work", {
 test_that("functional sequencescwork", {
   expect_identical((. %F.% toupper)("a"), "A")
   expect_identical((. %F..% toupper(.))("a"), "A")
+  expect_error((foo %F.% toupper)("a"))
+  expect_error((foo %F..% toupper(.))("a"))
 })
+
+
+test_that("side_effect() fails when called outside of debugger",
+          expect_error(side_effect("foo")))
+
+test_that("setup_nakedpipe_snippets doesn't fail", setup_nakedpipe_snippets())
