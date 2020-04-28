@@ -3,11 +3,23 @@
 \name{\%lapply.\%}
 \alias{\%lapply.\%}
 \alias{\%sapply.\%}
-\title{nakedpipe functionals}
+\alias{\%sapply..\%}
+\alias{\%lapply..\%}
+\alias{\%F.\%}
+\alias{\%F..\%}
+\title{nakedpipe functionals and functional sequences}
 \usage{
 X \%lapply.\% expr
 
 X \%sapply.\% expr
+
+X \%sapply..\% expr
+
+X \%lapply..\% expr
+
+dot \%F.\% expr
+
+dot \%F..\% expr
 }
 \arguments{
 \item{X}{list or vector of element to apply the sequence on}
@@ -15,5 +27,16 @@ X \%sapply.\% expr
 \item{expr}{call or sequence of calls wrapped inside \code{{}}}
 }
 \description{
-These combine functionals and \verb{\%.\%}
+These naked pipes are substitutes or helpers for functionals.
+}
+\details{
+\verb{\%lapply.\%} and \verb{\%sapply.\%} are infix \code{lapply} and \code{sapply} variants used to run
+a sequence of calls on each element of a vector, list or data frame.
+
+\verb{\%F.\%}
+can only take a dot on the lhs and returns a function, it is directly inspired
+from \emph{magrittr}'s functional sequences.
+
+\verb{\%lapply..\%} and \verb{\%sapply..\%} and \verb{\%F..\%} are the bare counterparts, they
+require explicit dots and have restricted features, but are faster.
 }
