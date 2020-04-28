@@ -210,3 +210,23 @@ test_that("if usage works", {
       letters %.% {if(length(.) < 3) head()},
       letters)
 })
+
+test_that("functionals work", {
+  expect_identical(
+    letters %lapply.% toupper,
+    as.list(toupper(letters)))
+  expect_identical(
+    letters %sapply.% toupper,
+    setNames(toupper(letters), letters))
+  expect_identical(
+    letters %sapply..% toupper(.),
+    setNames(toupper(letters), letters))
+  expect_identical(
+    letters %lapply..% toupper(.),
+    as.list(toupper(letters)))
+})
+
+test_that("functional sequencescwork", {
+  expect_identical((. %F.% toupper)("a"), "A")
+  expect_identical((. %F..% toupper(.))("a"), "A")
+})
