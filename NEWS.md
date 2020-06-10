@@ -9,6 +9,8 @@
 * When assigning to a dotted variable in side effects, the variable is available
 during the call but is not copied in the calling environment. This is a clean
 way to use temp variables.
+* We propose two addins "nakedpipe to magrittr", and "magrittr to nakedpipe",
+allowing one to select code in one syntax and replace it by the other.
 
 # nakedpipe 0.0.0.9000
 

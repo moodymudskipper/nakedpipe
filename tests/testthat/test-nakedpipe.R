@@ -237,4 +237,4 @@ test_that("functional sequencescwork", {
 test_that("side_effect() fails when called outside of debugger",
           expect_error(side_effect("foo")))
 
-test_that("setup_nakedpipe_snippets doesn't fail", setup_nakedpipe_snippets())
+# test_that("setup_nakedpipe_snippets doesn't fail", setup_nakedpipe_snippets())
