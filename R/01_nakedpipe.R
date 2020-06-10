@@ -120,11 +120,12 @@
 #' @rdname nakedpipe
 `%.%` <- function(x, expr) {
   pf <- parent.frame()
+  buffer_env <- new.env(parent = pf)
   expr <- substitute(expr)
   if (!is.call(expr)) return(eval(insert_dot(expr), envir = list(. = x), enclos = pf))
   if (identical(expr[[1]], quote(`{`))) expr <- as.list(substitute(expr)[-1])
   args <- c(list(x), expr)
-  Reduce(function(x,y) eval_step(x,y,pf), args)
+  Reduce(function(x,y) eval_step(x, y, pf, buffer_env), args)
 }
 
 #' @export

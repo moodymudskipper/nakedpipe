@@ -19,7 +19,7 @@ insert_dot <- function(expr) {
 
 # evaluate a single step given an output and expression, dealing with side effects
 # and assignments
-eval_step <-   fun <- function(input, expr, pf) {
+eval_step <-   fun <- function(input, expr, pf, buffer_env) {
 
   if (has_assignment_op(expr)) {
     # assignment can only be used with `~~`
@@ -28,8 +28,6 @@ eval_step <-   fun <- function(input, expr, pf) {
     # `~~ a <- b` is `"<-"(~~ a, b)` and
     # `~~ a -> b` is `"<-"(b, ~~ a)`
 
-    env <- new.env()
-    env$. <- input
     # remove double tilde from call before evaluation
     if (has_dbl_tilde(expr[[2]])) {
       expr[[2]] <- expr[[c(2,2,2)]]
@@ -39,27 +37,43 @@ eval_step <-   fun <- function(input, expr, pf) {
       stop("Wrong syntax! If you mean to assign as a side effect you should",
            "use a `~~` prefix")
     }
-    eval(expr, envir = env, enclos = pf)
+    # keep temporarily
+    # if(is.call(expr[[2]]) && identical(expr[[c(2,1)]], quote(`(`))){
+    #   expr[[2]] <- expr[[c(2,2)]]
+    #   buffer_env$. <- input
+    #   eval(expr, envir = buffer_env)
+    #   return(input)
+    # }
+
+    # we create a new environment in which to evaluate this side effect
+    # this way we can safely put "." there
+    env <- new.env(parent = buffer_env)
+    env$. <- input
+    eval(expr, envir = env)
+    # as.list by default drops "." and dotted variables
     list2env(x = as.list(env), envir = pf)
+    list2env(x = as.list(env, all.names = TRUE)[
+      ls(env, all.names = TRUE, pattern = "^\\..+")],
+      envir = buffer_env)
     return(input)
   }
   if (has_dbl_tilde(expr)) {
-    env <- new.env()
+    env <- new.env(parent = buffer_env)
     env$. <- input
     # evaluate expression past the tilde
-    eval(expr[[c(2,2)]], envir = env, enclos = pf)
+    eval(expr[[c(2,2)]], envir = env)
     list2env(x = as.list(env), envir = pf)
     return(input)
   }
 
   if (has_if(expr)) {
-    cond <- eval(expr[[2]], envir = list(. = input), enclos = pf)
+    cond <- eval(expr[[2]], envir = list(. = input), enclos = buffer_env)
     if(cond) {
-      res <- eval(insert_dot(expr[[3]]), envir = list(. = input), enclos = pf)
+      res <- eval(insert_dot(expr[[3]]), envir = list(. = input), enclos = buffer_env)
       return(res)
     } else {
       if(length(expr) == 4) {
-        res <- eval(insert_dot(expr[[4]]), envir = list(. = input), enclos = pf)
+        res <- eval(insert_dot(expr[[4]]), envir = list(. = input), enclos = buffer_env)
       } else {
         res <- input
       }
@@ -67,7 +81,7 @@ eval_step <-   fun <- function(input, expr, pf) {
     return(res)
   }
 
-  eval(insert_dot(expr), envir = list(. = input), enclos = pf)
+  eval(insert_dot(expr), envir = list(. = input), enclos = buffer_env)
 }
 
 has_if <- function(expr) {
