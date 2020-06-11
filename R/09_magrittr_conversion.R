@@ -1,67 +1,125 @@
-nakedpipe_to_magrittr <- function(){
-  selection <- rstudioapi::primary_selection(
-    rstudioapi::getSourceEditorContext())[["text"]]
-  rstudioapi::sendToConsole("",execute = F)
-  selection
+connect_np_steps_with_magrittr <- function(x,y) {
+  if(!is.call(y)) return(call("%>%", x, y))
+
+  y_fun_chr <- paste(deparse(y[[1]]), collapse=";")
+
+  if(y_fun_chr == "if") {
+    # handle `if` call
+    else_is_missing <- length(y) == 3
+    if(else_is_missing)
+      y[[4]] <- quote(.) # add an else condition
+    else
+      y[[4]] <- insert_dot(y[[4]])
+    y[[3]] <- insert_dot(y[[3]])
+    # wrap into `{` so it can be piped
+    y <- as.call(c(quote(`{`), y))
+    return(call("%>%", x, y))
+  }
+
+  if(y_fun_chr == "with") {
+    # handle `with` call
+    y <- y[[length(y)]] # so it works with or without explicit dot
+    return(call("%$%", x, y))
+  }
+
+  if(y_fun_chr == c("+")) {
+    y <- y[[length(y)]] # so it works with or without explicit dot
+    # we call "+" 2 times so we can detect where to go to the next line
+    return(call("+",x, call("+", y)))
+  }
+
+  if(y_fun_chr %in% c("<-", "<<-", "=")) {
+    stop("Can't convert, magrittr doesn't support temporary variables or ",
+         "assignments to the current environment.", call. = FALSE)
+  }
+
+  if(y_fun_chr == "~") {
+    warning(paste("converting side effects between magrittr and nakedpipe syntax is",
+            "not guaranteed to always work as they deal differently with environments."))
+    y <- y[[c(2,2)]]
+    return(call("%T>%", x, y))
+  }
+
+  call("%>%", x, y)
+}
+
+
+np_standard_pipes   <- c("%..%","%.%", "%L.%", "%D.", "%V.%", "%P.", "%F.", "%F..")
+
+np_assignment_pipes <- c("%<..%","%<.%", "%<L.%", "%<V.%", "%<P.")
+
+# "+" is included as it ca be used for ggplot calls
+mg_pipes <- c("%>%", "%$%", "%T>%", "+")
+
+toggle <- function() {
+
+  context <- rstudioapi::getSourceEditorContext()
+  selection <- rstudioapi::primary_selection(context)[["text"]]
   selection_lng <- str2lang(selection)
 
   # support case where we selected assignment
-  if(is.call(selection_lng) & deparse(selection_lng[[1]]) %in% c("<-", "<<-", "=", ":=")){
-    is_assignment <- TRUE
+  assignment_syms <- c("<-", "<<-", "=", ":=")
+  is_assignment <-
+    is.call(selection_lng) && deparse(selection_lng[[1]]) %in% assignment_syms
+  assign_op <- NULL
+  assign_target <- NULL
+  if(is_assignment){
     assign_op     <- selection_lng[[1]]
     assign_target <- selection_lng[[2]]
     selection_lng <- selection_lng[[3]]
-  } else {
-    is_assignment <- FALSE
   }
 
-  pipe <- selection_lng[[1]]
-  pipe_chr <- deparse(pipe)
-  standard_pipes <- c("%..%","%.%", "%L.%", "%D.", "%V.%", "%P.", "%F.", "%F..")
-  assignment_pipes <- c("%<..%","%<.%", "%<L.%", "%<V.%", "%<P.")
-  if(!pipe_chr %in% c(standard_pipes, assignment_pipes)){
-    stop("select a full proper nakedpipe call to use this functionality", call. = FALSE)
+  # maybe better check with regex to check start of the pipe not end
+  pipe_chr <- deparse(selection_lng[[1]])
+  if (pipe_chr %in% c(np_standard_pipes, np_assignment_pipes)) {
+    txt <- nakedpipe_to_magrittr(
+      selection_lng, is_assignment, assign_op, assign_target)
+  } else if (pipe_chr %in% mg_pipes) {
+    txt <- magrittr_to_nakedpipe(
+      selection_lng, is_assignment, assign_op, assign_target)
+  } else {
+    stop("select proper nakedpipe or magrittr call to use this functionality", call. = FALSE)
   }
+  rstudioapi::modifyRange(context$selection[[c(1,1)]], txt, context$id)
+}
+
+nakedpipe_to_magrittr <- function(selection_lng, is_assignment, assign_op, assign_target){
+
+  pipe_chr <- deparse(selection_lng[[1]])
 
   input <- selection_lng[[2]]
-  if(is.call(selection_lng[[3]]) && identical(selection_lng[[c(3,1)]], quote(`{`))) {
-    args <- as.list(selection_lng[[3]][-1])
+  np_uses_curly <-
+    is.call(selection_lng[[3]]) && identical(selection_lng[[c(3,1)]], quote(`{`))
+  if(np_uses_curly) {
+    steps <- as.list(selection_lng[[3]][-1])
 
-    # inspect args for side effects
-    lapply(args, function(x) {
-      if (is.call(x) && deparse(x[[1]]) %in% c("~", "<-", "<<-", "="))
-        stop("a nakedpipe containing side effects (`~~ expr`) cannot be converted", call. = FALSE)
-    })
-
-    if(pipe_chr %in% standard_pipes)
-      args <- c(input, args)
+    # integrate input in steps
+    if(pipe_chr %in% np_standard_pipes)
+      steps <- c(input, steps)
     else
-      args[[1]] <- call("%<>%", input, args[[1]])
+      steps[[1]] <- call("%<>%", input, steps[[1]])
 
-    piped_expr <- Reduce(function(x,y) {
-      if(is.call(y) && identical(y[[1]], quote(with))) {
-        y <- y[[length(y)]] # so it works with or without explicit dot
-        call("%$%", x, y)
-      } else if(is.call(y) && identical(y[[1]], quote(`+`))) {
-        y <- y[[length(y)]] # so it works with or without explicit dot
-        # we call "+" 2 times so we can detect where to go to the next line
-        call("+",x, call("+", y))
-      } else {
-        call("%>%", x, y)
-      }
-    }, args)
+    # connect all steps
+    piped_expr <- Reduce(connect_np_steps_with_magrittr, steps)
 
+    # rebuild original call by prefixing assignment `foo <- ...`
     if(is_assignment)
       piped_expr <- call(deparse(assign_op), assign_target, piped_expr)
 
-    txt <- deparse(piped_expr)
-    txt <- gsub("\\%>\\% ", "%>%\n  ", txt)
-    txt <- gsub("\\%<>\\% ", "%<>%\n  ", txt)
-    txt <- gsub("\\%\\$\\% ", "%$%\n  ", txt)
-    txt <- gsub("\\+ \\+", "+\n  ", txt)
+    # format output
+    txt <- piped_expr %..% {
+      deparse(.)
+      gsub("\\%>\\% ", "%>%\n  ", .)
+      gsub("\\%T>\\% ", "%T>%\n  ", .)
+      gsub("\\%<>\\% ", "%<>%\n  ", .)
+      gsub("\\%\\$\\% ", "%$%\n  ", .)
+      gsub("\\+ \\+", "+\n  ", .)
+      paste(., collapse = "\n")
+    }
+
   } else {
     arg <- selection_lng[[3]]
-    if(pipe_chr %in% standard_pipes)
+    if(pipe_chr %in% np_standard_pipes)
       piped_expr <- call("%>%", input, arg)
     else
       piped_expr <- call("%<>%", input, arg)
@@ -71,68 +129,83 @@ nakedpipe_to_magrittr <- function(){
 
     txt <- deparse(piped_expr)
   }
-
-  context <- rstudioapi::getSourceEditorContext()
-  rstudioapi::modifyRange(context$selection[[c(1,1)]], txt, context$id)
+  txt
 }
 
+magrittr_to_nakedpipe <- function(selection_lng, is_assignment, assign_op, assign_target){
 
-
-magrittr_to_nakedpipe <- function(){
-  selection <- rstudioapi::primary_selection(
-    rstudioapi::getSourceEditorContext())[["text"]]
-  rstudioapi::sendToConsole("",execute = F)
-  selection
-  selection_lng <- str2lang(selection)
-
-  # support case where we selected assignment
-  if(is.call(selection_lng) & deparse(selection_lng[[1]]) %in% c("<-", "<<-", "=", ":=")){
-    is_assignment <- TRUE
-    assign_op     <- selection_lng[[1]]
-    assign_target <- selection_lng[[2]]
-    selection_lng <- selection_lng[[3]]
-  } else {
-    is_assignment <- FALSE
-  }
   pipe_chr <- deparse(selection_lng[[1]])
-  # this is not the first pipe but the last!
-  if(!pipe_chr %in% c("%>%", "%$%", "%T>%", "+")){
-    stop("select a full proper magrittr pipe chain call to use this functionality",
-         call. = FALSE)
+  steps <- list()
+
+  repeat {
+    # break loop if not a pipe or "+"
+    if (is.call(selection_lng)) pipe_chr <- deparse(selection_lng[[1]])
+    is_pipe_or_plus <- is.call(selection_lng) && pipe_chr %in% c("%>%", "%$%", "%T>%", "+")
+    if(!is_pipe_or_plus) break
+
+    if(pipe_chr == "%T>%") {
+      warning(paste("converting side effects between magrittr and nakedpipe syntax is",
+                    "not guaranteed to always work as they deal differently with environments."))
+      step <- insert_dot(selection_lng[[3]])
+      step <- call("~",call("~",step))
+      steps <- c(step, steps)
+      selection_lng <- selection_lng[[2]]
+      next
+    }
+      # stop("a magrittr pipe chain containing side effects (`%T>%`) cannot be converted",
+      #      call. = FALSE)
+
+    if(pipe_chr == "%$%") {
+      steps <- c(call("with",selection_lng[[3]]), steps)
+      selection_lng <- selection_lng[[2]]
+      next
+    }
+
+    if(pipe_chr == "+") {
+      steps <- c(call("+",selection_lng[[3]]), steps)
+      selection_lng <- selection_lng[[2]]
+      next
+    }
+
+    curr_step <- selection_lng[[3]]
+
+    # disentangle conditional step
+    is_if_step <-
+      length(curr_step) == 2 &&
+      identical(curr_step[[1]], quote(`{`)) &&
+      is.call(curr_step[[2]]) &&
+      identical(curr_step[[c(2,1)]], quote(`if`))
+
+    if(is_if_step) {
+      curr_step <- curr_step[[2]]
+      else_is_missing <- length(curr_step) == 3
+      if (else_is_missing) curr_step[4] <- list(NULL)
+      else_is_dot <-
+        length(curr_step) == 4 && identical(curr_step[[4]], quote(.))
+      if (else_is_dot) curr_step[[4]] <- NULL
+    }
+    steps <- c(curr_step, steps)
+    selection_lng <- selection_lng[[2]]
   }
 
-  args <- list()
-  while(is.call(selection_lng) &&
-        (pipe_chr <- deparse(selection_lng[[1]])) %in% c("%>%", "%$%", "%T>%", "+")){
-    if(pipe_chr == "%T>%")
-      stop("a magrittr pipe chain containing side effects (`%T>%`) cannot be converted",
-           call. = FALSE)
-    if(pipe_chr == "%$%") {
-      args <- c(call("with",selection_lng[[3]]), args)
-      selection_lng <- selection_lng[[2]]
-    } else if(pipe_chr == "+") {
-      args <- c(call("+",selection_lng[[3]]), args)
-      selection_lng <- selection_lng[[2]]
-    } else {
-    args <- c(selection_lng[[3]], args)
-    selection_lng <- selection_lng[[2]]
-    }
-  }
-  if(is.call(selection_lng) && identical(selection_lng[[1]], quote(`%<>%`))){
-    args <- c(selection_lng[[3]], args)
+  has_assignment_pipe <-
+    is.call(selection_lng) && identical(selection_lng[[1]], quote(`%<>%`))
+  if(has_assignment_pipe){
+    steps <- c(selection_lng[[3]], steps)
     input <- selection_lng[[2]]
-    np_expr <- call("%<.%", input, as.call(c(quote(`{`), args)))
+    np_expr <- call("%<.%", input, as.call(c(quote(`{`), steps)))
   } else {
     input <- selection_lng
-    np_expr <- call("%.%", input, as.call(c(quote(`{`), args)))
+    np_expr <- call("%.%", input, as.call(c(quote(`{`), steps)))
   }
 
   if(is_assignment)
     np_expr <- call(deparse(assign_op), assign_target, np_expr)
-  txt <- deparse(np_expr)
-  txt <- gsub("^    ","  ", txt)
-  txt <- paste(txt, collapse="\n")
 
-  context <- rstudioapi::getSourceEditorContext()
-  rstudioapi::modifyRange(context$selection[[c(1,1)]], txt, context$id)
+  txt <- np_expr %..% {
+    deparse(.)
+    gsub("^    ","  ", .)
+    paste(., collapse="\n")
+  }
+  txt
 }

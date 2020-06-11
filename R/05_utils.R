@@ -3,6 +3,10 @@ NULL
 
 # insert dot at the relevant place following magrittr conventions
 insert_dot <- function(expr) {
+  # # if it's the dot, leave untouched
+  # if (identical(expr, quote(.)))
+  #   return(expr)
+
   if (is.symbol(expr) || expr[[1]] == quote(`(`)) {
     # if a symbol or an expression inside parentheses, make it a call with dot arg
     expr <- as.call(c(expr, quote(`.`)))

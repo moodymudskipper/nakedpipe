@@ -1,9 +1,4 @@
-Name: nakedpipe to magrittr
-Description: Capture code using nakedpipe syntax and turn it into magrittr syntax
-Binding: nakedpipe_to_magrittr
-Interactive: false
-
-Name: magrittr to nakedpipe
-Description: Capture code using magrittr syntax and turn it into nakedpipe syntax
-Binding: magrittr_to_nakedpipe
+Name: nakedpipe to/from magrittr
+Description: Capture code using nakedpipe syntax and turn it into magrittr syntax, and inversely
+Binding: toggle
 Interactive: false
