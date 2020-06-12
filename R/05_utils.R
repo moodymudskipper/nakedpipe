@@ -24,6 +24,8 @@ insert_dot <- function(expr) {
 # evaluate a single step given an output and expression, dealing with side effects
 # and assignments
 eval_step <-   fun <- function(input, expr, pf, buffer_env) {
+  # we could go a bit faster, we restest each time if expr is a call
+  # we can test once first, and modify all our functions so they don't test anymore
 
   if (has_assignment_op(expr)) {
     # assignment can only be used with `~~`
@@ -41,13 +43,6 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
       stop("Wrong syntax! If you mean to assign as a side effect you should",
            "use a `~~` prefix")
     }
-    # keep temporarily
-    # if(is.call(expr[[2]]) && identical(expr[[c(2,1)]], quote(`(`))){
-    #   expr[[2]] <- expr[[c(2,2)]]
-    #   buffer_env$. <- input
-    #   eval(expr, envir = buffer_env)
-    #   return(input)
-    # }
 
     # we create a new environment in which to evaluate this side effect
     # this way we can safely put "." there
@@ -85,6 +80,58 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
     return(res)
   }
 
+  if (has_scalar_logic(expr)){
+    stop("You've used '&&' or '||' in a naked pipe step, did you mean '&' or '||' ?")
+  }
+
+  if(has_logic_or_comparison(expr)){
+    expr <- call("subset", expr)
+  }
+
+  if(has_tilde(expr)){
+    class_ <- class(input)
+    nm <- deparse(expr[[2]])
+    agg_call <- expr[[2]]
+    grp_vars <- attr(terms(eval(expr[-2])), "term.labels")
+    splitter <- interaction(input[grp_vars], drop = TRUE)
+    split_data <- split(input, splitter)
+    res_agg <- sapply(split_data, function(x)
+      eval(bquote(with(.(x), .(agg_call))), envir = list(. = input), enclos = buffer_env),
+      USE.NAMES = FALSE)
+    res <- do.call("rbind", lapply(split_data, `[`, 1,grp_vars, drop = FALSE))
+    res[nm] <- res_agg
+    row.names(res) <- NULL
+    class(res) <- class_
+    return(res)
+  }
+
+  if(has_colon_equal(expr)){
+    new_nm <- as.character(expr[[2]])
+    old_nm <- as.character(expr[[3]])
+    names(input)[names(input) == old_nm] <- new_nm
+    return(input)
+  }
+
+  if(has_equal(expr)){
+    if(has_tilde(expr[[3]])){
+      class_ <- class(input)
+      nm <- as.character(expr[[2]])
+      agg_call <- expr[[3]][[2]]
+      grp_vars <- attr(terms(eval(expr[[3]][-2])), "term.labels")
+      splitter <- interaction(input[grp_vars], drop = TRUE)
+      split_data <- split(input, splitter)
+      res_agg <- sapply(split_data, function(x)
+        eval(bquote(with(.(x), .(agg_call))), envir = list(. = input), enclos = buffer_env),
+        USE.NAMES = FALSE)
+      res <- do.call("rbind", lapply(split_data, `[`, 1,grp_vars, drop = FALSE))
+      res[nm] <- res_agg
+      row.names(res) <- NULL
+      class(res) <- class_
+      return(res)
+    } else {
+      expr <- as.call(c(quote(transform), setNames(list(expr[[3]]), as.character(expr[[2]]))))
+    }
+  }
   eval(insert_dot(expr), envir = list(. = input), enclos = buffer_env)
 }
 
@@ -93,17 +140,46 @@ has_if <- function(expr) {
 }
 
 
+has_equal <- function(expr) {
+  is.call(expr) && identical(expr[[1]], quote(`=`))
+}
+
+has_colon_equal <- function(expr) {
+  is.call(expr) && identical(expr[[1]], quote(`:=`))
+}
+
 has_assignment_op <- function(expr) {
   is.call(expr) && (
     identical(expr[[1]], quote(`<-`)) ||
-      identical(expr[[1]], quote(`<<-`)) ||
-      identical(expr[[1]], quote(`=`)))
+      identical(expr[[1]], quote(`<<-`)))
 }
 
-has_dbl_tilde <- function(y) {
-  is.call(y) && identical(y[[1]], quote(`~`)) &&
-    is.call(y[[2]]) && identical(y[[c(2,1)]], quote(`~`)) &&
-    length(y[[2]] == 2)
+has_tilde <- function(expr) {
+  is.call(expr) && identical(expr[[1]], quote(`~`))
+}
+
+has_dbl_tilde <- function(expr) {
+  has_tilde(expr) && has_tilde(expr[[2]]) && length(expr[[2]] == 2)
+}
+
+has_logic_or_comparison <- function(expr) {
+  is.call(expr) && (
+    identical(expr[[1]], quote(`<`)) ||
+      identical(expr[[1]], quote(`>`)) ||
+      identical(expr[[1]], quote(`<=`)) ||
+      identical(expr[[1]], quote(`>=`)) ||
+      identical(expr[[1]], quote(`==`)) ||
+      identical(expr[[1]], quote(`!=`)) ||
+      identical(expr[[1]], quote(`&`)) ||
+      identical(expr[[1]], quote(`|`)) ||
+      identical(expr[[1]], quote(`%in%`)))
+}
+
+
+has_scalar_logic <- function(expr) {
+  is.call(expr) && (
+      identical(expr[[1]], quote(`&&`)) ||
+      identical(expr[[1]], quote(`||`)))
 }
 
 writeToClipboard  <- function(x) {
