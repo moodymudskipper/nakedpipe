@@ -36,8 +36,8 @@ Pipe into a sequence of calls using `%.%`
 
 ``` r
 cars %.% {
- head(2)
- transform(time = dist/speed)
+  head(2)
+  transform(time = dist/speed)
 }
 #>   speed dist time
 #> 1     4    2  0.5
@@ -48,8 +48,8 @@ It plays well with left to right assignment
 
 ``` r
 cars %.% {
- head(2)
- transform(time = dist/speed)
+  head(2)
+  transform(time = dist/speed)
 } -> res
 ```
 
@@ -57,9 +57,9 @@ Use `~~` for side effects
 
 ``` r
 cars %.% {
- head(2)
- ~~ message("nrow:", nrow(.))
- transform(time = dist/speed)
+  head(2)
+  ~~ message("nrow:", nrow(.))
+  transform(time = dist/speed)
 }
 #> nrow:2
 #>   speed dist time
@@ -71,9 +71,9 @@ This include assignments
 
 ``` r
 cars %.% {
- head(2)
- ~~ cars_h <- .
- transform(time = dist/speed)
+  head(2)
+  ~~ cars_h <- . # or ~~ . -> cars_h
+  transform(time = dist/speed)
 }
 #>   speed dist time
 #> 1     4    2  0.5
@@ -84,14 +84,52 @@ cars_h
 #> 2     4   10
 ```
 
+To assign to a temp variable, use a dotted name
+
+``` r
+cars %.% {
+  ~~ .n <- 2
+  head(.n)
+  transform(time = dist/speed)
+}
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+exists(".n")
+#> [1] FALSE
+```
+
+Use `if` for conditional step. if the condition is not TRUE and there is
+no `else` clause the data is unchanged.
+
+``` r
+cars %.% {
+  head(2)
+  if(ncol(.) < 5) transform(time = dist/speed)
+}
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+
+cars %.% {
+  head(2)
+  if(ncol(.) > 5) transform(time = dist/speed)
+}
+#>   speed dist
+#> 1     4    2
+#> 2     4   10
+```
+
+## Additional pipes
+
 Assign in place using `%<.%`
 
 ``` r
 cars_copy <- cars
 cars_copy %<.% {
- head(2)
- ~~ message("nrow:", nrow(.))
- transform(time = dist/speed)
+  head(2)
+  ~~ message("nrow:", nrow(.))
+  transform(time = dist/speed)
 }
 #> nrow:2
 cars_copy
@@ -104,9 +142,9 @@ Clock each step using `%L.%`
 
 ``` r
 cars %L.% {
- head(2)
- ~~ Sys.sleep(1)
- transform(time = dist/speed)
+  head(2)
+  ~~ Sys.sleep(1)
+  transform(time = dist/speed)
 }
 #> cars %L.% {
 #>   head(2)
@@ -114,7 +152,7 @@ cars %L.% {
 #>       0       0       0
 #>   ~~Sys.sleep(1)
 #>    user  system elapsed 
-#>       0       0       1
+#>    0.00    0.00    1.01
 #>   transform(time = dist/speed)
 #>    user  system elapsed 
 #>       0       0       0
@@ -124,12 +162,43 @@ cars %L.% {
 #> 2     4   10  2.5
 ```
 
+`print()` the output of each step using `%P.%`
+
+``` r
+cars %P.% {
+  head(2)
+  transform(time = dist/speed)
+}
+#> cars %P.% {
+#>   head(2)
+#>   speed dist
+#> 1     4    2
+#> 2     4   10
+#>   transform(time = dist/speed)
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+#> }
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+```
+
+`View()` the output of each step using `%V.%`
+
+``` r
+cars %V.% {
+  head(2)
+  transform(time = dist/speed)
+}
+```
+
 `%..%` is faster at the cost of using explicit dots
 
 ``` r
 cars %..% {
- head(.,2)
- transform(.,time = dist/speed)
+  head(.,2)
+  transform(.,time = dist/speed)
 }
 #>   speed dist time
 #> 1     4    2  0.5
@@ -141,15 +210,48 @@ notation but you can do :
 
 ``` r
 cars %..% {
- head(.,2)
+  head(.,2)
   {message("nrow:", nrow(.)); .}
- transform(.,time = dist/speed)
+  transform(.,time = dist/speed)
 }
 #> nrow:2
 #>   speed dist time
 #> 1     4    2  0.5
 #> 2     4   10  2.5
 ```
+
+Create a function using `%F.%` on `.`
+
+``` r
+fun <- . %F.% {
+  head(.,2)
+  transform(.,time = dist/speed)
+}
+fun(cars)
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+```
+
+Apply a sequence of calls on all elements using `%lapply.%`
+
+``` r
+replicate(2, cars, simplify = FALSE) %lapply.% {
+  head(.,2)
+  transform(.,time = dist/speed)
+}
+#> [[1]]
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+#> 
+#> [[2]]
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+```
+
+See `?"%.%"` and `?"%lapply.%"` to see all available pipes.
 
 ## Debugging
 
@@ -158,8 +260,8 @@ The `%D.%` pipe allows you to step through the calls one by one.
 ``` r
 # Debug the pipe using `%D.%`
 cars %D.% {
- head(2)
- transform(time = dist/speed)
+  head(2)
+  transform(time = dist/speed)
 }
 ```
 
@@ -202,9 +304,8 @@ saveRDS(plt, path)
 ```
 
 The former case above shows operators on both sides, which looks a bit
-complicated, the case below requires a temporary variable and we must
-look at the end of the previous line to know what kind of piping was
-done.
+complicated, the latter requires a temporary variable and we must look
+at the end of the previous line to know what kind of piping was done.
 
 In both cases additionally if I chose to comment out the
 `ggtitle("head(cars)")` line, I should also comment the last operator at
@@ -225,6 +326,13 @@ cars %.% {
 `+` signs are neatly alligned, it’s obvious where the *ggplot* chain
 starts and ends, and trivial to pipe it to another instruction or to
 comment a line.
+
+## Conversion to magrittr syntax and back
+
+We provide an addin to ease the conversion.
+
+![Alt
+Text](https://user-images.githubusercontent.com/18351714/84393270-add85b80-abfb-11ea-8a7d-3ec4c8c59d55.gif)
 
 ## Benchmark
 
@@ -263,10 +371,10 @@ bench::mark(iterations = 10000,
 #> # A tibble: 4 x 6
 #>   expression      min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 %>%          94.3us  112.2us     7231.     119KB     15.9
-#> 2 %.%          47.4us   58.5us    15707.        0B     17.3
-#> 3 %..%         16.9us   19.6us    46990.        0B     18.8
-#> 4 base          1.5us    1.9us   388146.        0B     38.8
+#> 1 %>%         106.4us  132.2us     5830.     118KB     12.9
+#> 2 %.%          59.2us   73.6us    10703.      280B     15.0
+#> 3 %..%         20.5us     25us    37715.        0B     15.1
+#> 4 base          2.2us    2.5us   304932.        0B      0
 ```
 
 ## Snippets
@@ -292,7 +400,7 @@ cars %.% {
 ## Similar efforts
 
 *nakedpipe* is heavily inspired by *magrittr* and follows the same dot
-insertions conventions.
+insertion rules.
 
 Alternative pipes are available on *CRAN*, at the time of writing and to
 my knowlege, in packages *wrapr* and *pipeR*. The latter includes a

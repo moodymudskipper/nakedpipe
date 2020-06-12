@@ -44,8 +44,8 @@ Pipe into a sequence of calls using `%.%`
 
 ```{r}
 cars %.% {
- head(2)
- transform(time = dist/speed)
+  head(2)
+  transform(time = dist/speed)
 }
 ```
 
@@ -53,8 +53,8 @@ It plays well with left to right assignment
 
 ```{r}
 cars %.% {
- head(2)
- transform(time = dist/speed)
+  head(2)
+  transform(time = dist/speed)
 } -> res
 ```
 
@@ -62,9 +62,9 @@ Use `~~` for side effects
 
 ```{r}
 cars %.% {
- head(2)
- ~~ message("nrow:", nrow(.))
- transform(time = dist/speed)
+  head(2)
+  ~~ message("nrow:", nrow(.))
+  transform(time = dist/speed)
 }
 ```
 
@@ -72,21 +72,51 @@ This include assignments
 
 ```{r}
 cars %.% {
- head(2)
- ~~ cars_h <- .
- transform(time = dist/speed)
+  head(2)
+  ~~ cars_h <- . # or ~~ . -> cars_h
+  transform(time = dist/speed)
 }
 cars_h
 ```
+
+To assign to a temp variable, use a dotted name
+
+```{r}
+cars %.% {
+  ~~ .n <- 2
+  head(.n)
+  transform(time = dist/speed)
+}
+exists(".n")
+```
+
+Use `if` for conditional step. if the condition is not TRUE and there is no
+`else` clause the data is unchanged.
+
+```{r}
+cars %.% {
+  head(2)
+  if(ncol(.) < 5) transform(time = dist/speed)
+}
+
+cars %.% {
+  head(2)
+  if(ncol(.) > 5) transform(time = dist/speed)
+}
+
+```
+
+
+## Additional pipes
 
 Assign in place using `%<.%`
 
 ```{r}
 cars_copy <- cars
 cars_copy %<.% {
- head(2)
- ~~ message("nrow:", nrow(.))
- transform(time = dist/speed)
+  head(2)
+  ~~ message("nrow:", nrow(.))
+  transform(time = dist/speed)
 }
 cars_copy
 ```
@@ -95,18 +125,38 @@ Clock each step using `%L.%`
 
 ```{r}
 cars %L.% {
- head(2)
- ~~ Sys.sleep(1)
- transform(time = dist/speed)
+  head(2)
+  ~~ Sys.sleep(1)
+  transform(time = dist/speed)
 }
 ```
+
+
+`print()` the output of each step using `%P.%`
+
+```{r}
+cars %P.% {
+  head(2)
+  transform(time = dist/speed)
+}
+```
+
+`View()` the output of each step using `%V.%`
+
+```{r, eval = FALSE}
+cars %V.% {
+  head(2)
+  transform(time = dist/speed)
+}
+```
+
 
 `%..%` is faster at the cost of using explicit dots
 
 ```{r}
 cars %..% {
- head(.,2)
- transform(.,time = dist/speed)
+  head(.,2)
+  transform(.,time = dist/speed)
 }
 ```
 
@@ -115,11 +165,32 @@ but you can do :
 
 ```{r}
 cars %..% {
- head(.,2)
+  head(.,2)
   {message("nrow:", nrow(.)); .}
- transform(.,time = dist/speed)
+  transform(.,time = dist/speed)
 }
 ```
+
+Create a function using `%F.%` on `.`
+
+```{r}
+fun <- . %F.% {
+  head(.,2)
+  transform(.,time = dist/speed)
+}
+fun(cars)
+```
+
+Apply a sequence of calls on all elements using `%lapply.%`
+
+```{r}
+replicate(2, cars, simplify = FALSE) %lapply.% {
+  head(.,2)
+  transform(.,time = dist/speed)
+}
+```
+
+See `?"%.%"` and `?"%lapply.%"` to see all available pipes.
 
 ## Debugging
 
@@ -128,8 +199,8 @@ The `%D.%` pipe allows you to step through the calls one by one.
 ```{r, eval = FALSE}
 # Debug the pipe using `%D.%`
 cars %D.% {
- head(2)
- transform(time = dist/speed)
+  head(2)
+  transform(time = dist/speed)
 }
 ```
 
@@ -191,6 +262,12 @@ cars %.% {
 
 `+` signs are neatly alligned, it's obvious where the *ggplot* chain starts and
 ends, and trivial to pipe it to another instruction or to comment a line.
+
+## Conversion to magrittr syntax and back
+
+We provide an addin to ease the conversion.
+
+![Alt Text](https://user-images.githubusercontent.com/18351714/84393270-add85b80-abfb-11ea-8a7d-3ec4c8c59d55.gif)
 
 ## Benchmark
 
