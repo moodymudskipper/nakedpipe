@@ -18,7 +18,8 @@
 #'   calls and their execution times.
 #' - `%<L.%`, `%<P.%` and `%<V.%` are assigning counterparts of the pipes described above.
 #' - `%D.%` is the **debugging pipe**, is used to go through the pipe step by
-#'   step, it gives the  same output as the standard `%.%` pipe. See also
+#'   step, it gives the  same output as the standard `%.%` pipe though it doesn't strictly
+#'   reproduces how the standard pipe works. See also
 #'   `?side_effect`.
 #'
 #' @section side effects

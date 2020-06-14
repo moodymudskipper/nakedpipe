@@ -28,9 +28,45 @@ connect_np_steps_with_magrittr <- function(x,y) {
     return(call("+",x, call("+", y)))
   }
 
-  if(y_fun_chr %in% c("<-", "<<-", "=")) {
+  if(y_fun_chr %in% c("<-", "<<-")) {
     stop("Can't convert, magrittr doesn't support temporary variables or ",
          "assignments to the current environment.", call. = FALSE)
+  }
+
+  if(y_fun_chr %in% c("<", ">", "<=", ">=", "==", "!=", "%in%", "|", "&")) {
+    y <- call("subset", y)
+  }
+
+  if(y_fun_chr == "=") {
+    y <- as.call(c(quote(transform), setNames(list(y[[3]]), as.character(y[[2]]))))
+  }
+
+  if(y_fun_chr == "[") {
+    if (has_dt(y)) {
+      warning("Be cautious when translating a neked pipe using the `.dt[...]` feature, you might lose class information")
+      if(!identical(y[[2]], quote(.dt))) {
+        # if we have a data.table call with multiple brackets .dt[...][...]
+        y <- call("{",y)
+      }
+      y <- do.call("substitute", list(y, list(.dt = quote(.))))
+      res <- call("%>%", x, quote(data.table::as.data.table()))
+      res <- call("%>%", res, y)
+      res <- call("%>%", res, quote(as.data.frame()))
+      return(res)
+    }
+
+    if (has_tb(y)) {
+      warning("Be cautious when translating a neked pipe using the `.tb[...]` feature, you might lose class information")
+      if(!identical(y[[2]], quote(.tb))) {
+        # if we have a tb call with multiple brackets .dt[...][...]
+        y <- call("{",y)
+      }
+      y <- do.call("substitute", list(y, list(.tb = quote(.))))
+      res <- call("%>%", x, quote(tb::as_tb()))
+      res <- call("%>%", res, y)
+      res <- call("%>%", res, quote(as.data.frame()))
+      return(res)
+    }
   }
 
   if(y_fun_chr == "~") {
@@ -44,7 +80,7 @@ connect_np_steps_with_magrittr <- function(x,y) {
 }
 
 
-np_standard_pipes   <- c("%..%","%.%", "%L.%", "%D.", "%V.%", "%P.", "%F.", "%F..")
+np_standard_pipes   <- c("%..%","%.%", "%L.%", "%D.%", "%V.%", "%P.", "%F.", "%F..")
 
 np_assignment_pipes <- c("%<..%","%<.%", "%<L.%", "%<V.%", "%<P.")
 
@@ -108,7 +144,7 @@ nakedpipe_to_magrittr <- function(selection_lng, is_assignment, assign_op, assig
 
     # format output
     txt <- piped_expr %..% {
-      deparse(.)
+      deparse(., width.cutoff = 500) # Inf is not valid
       gsub("\\%>\\% ", "%>%\n  ", .)
       gsub("\\%T>\\% ", "%T>%\n  ", .)
       gsub("\\%<>\\% ", "%<>%\n  ", .)

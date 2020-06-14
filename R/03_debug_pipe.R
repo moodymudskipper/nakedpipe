@@ -13,12 +13,51 @@
           stop("Wrong syntax! If you mean to assign as a side effect you should",
                "use a `~~` prefix")
         expr[[2]] <- expr[[c(2,2,2)]]
+        if(substr(as.character(expr[[2]]), 1, 1) == ".")
+          return(expr)
         return(bquote(side_effect(.(expr))))
       }
       if (has_dbl_tilde(expr)) {
         expr <- expr[[c(2,2)]]
         return(bquote(side_effect(.(expr))))
       }
+      if (has_equal(expr)) {
+        expr <- as.call(c(quote(transform), setNames(list(expr[[3]]), as.character(expr[[2]]))))
+      }
+      if (has_logic_or_comparison(expr)) {
+        expr <- call("subset", expr)
+      }
+      if (has_dt(expr)) {
+        expr <- bquote({
+          .dt <- data.table::as.data.table(.)
+          .dt <- .(expr)
+          class(.dt) <- class(.)
+          . <- .dt
+          })
+        return(expr)
+      }
+
+      if (has_tb(expr)) {
+        expr <- bquote({
+          .tb <- tb::as_tb(.)
+          .tb <- .(expr)
+          class(.tb) <- class(.)
+          . <- .tb
+        })
+        return(expr)
+      }
+
+      if (has_if(expr)) {
+        expr[[3]] <- insert_dot(expr[[3]])
+        if (length(expr) == 4) {
+          expr[[4]] <- insert_dot(expr[[4]])
+        } else {
+          expr[[4]] <- quote(.)
+        }
+        expr <- bquote(. <- .(expr))
+        return(expr)
+      }
+
       expr <- insert_dot(expr)
       as.call(c(quote(`<-`), quote(.), expr))
     })

@@ -62,7 +62,8 @@ the output of each step.
 calls and their execution times.
 \item \verb{\%<L.\%}, \verb{\%<P.\%} and \verb{\%<V.\%} are assigning counterparts of the pipes described above.
 \item \verb{\%D.\%} is the \strong{debugging pipe}, is used to go through the pipe step by
-step, it gives the  same output as the standard \verb{\%.\%} pipe. See also
+step, it gives the  same output as the standard \verb{\%.\%} pipe though it doesn't strictly
+reproduces how the standard pipe works. See also
 \code{?side_effect}.
 }
 }
