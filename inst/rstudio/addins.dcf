@@ -2,3 +2,8 @@ Name: nakedpipe to/from magrittr
 Description: Capture code using nakedpipe syntax and turn it into magrittr syntax, and inversely
 Binding: toggle
 Interactive: false
+
+Name: nakedpipe run incomplete call
+Description: Adds a trailing "}" and runs a nakedpipe call in which not all steps were selected
+Binding: run_incomplete_call
+Interactive: false
