@@ -56,6 +56,7 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
       envir = buffer_env)
     return(input)
   }
+
   if (has_dbl_tilde(expr)) {
     env <- new.env(parent = buffer_env)
     env$. <- input
@@ -112,6 +113,32 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
     return(input)
   }
 
+  if(has_dt(expr)) {
+    if (!is.data.frame(input))
+      stop("lhs must be a data frame")
+    class_ <- class(input)
+    if(!requireNamespace("data.table"))
+      stop("You must have the package 'data.table' installed to use the feature `.dt[...]` in a nakedpipe call")
+    assign(".dt", data.table::as.data.table(input), envir = buffer_env)
+    res <- eval(expr, envir = list(. = input), enclos = buffer_env)
+    rm(.dt, envir = buffer_env)
+    class(res) <- class_
+    return(res)
+  }
+
+  if(has_tb(expr)) {
+    if (!is.data.frame(input))
+      stop("lhs must be a data frame")
+    class_ <- class(input)
+    if(!requireNamespace("tb"))
+      stop("You must have the package 'tb' installed to use the feature `.dt[...]` in a nakedpipe call")
+    assign(".tb", tb::as_tb(input), envir = buffer_env)
+    res <- eval(expr, envir = list(. = input), enclos = buffer_env)
+    rm(.tb, envir = buffer_env)
+    class(res) <- class_
+    return(res)
+  }
+
   if(has_equal(expr)){
     if(has_tilde(expr[[3]])){
       class_ <- class(input)
@@ -134,6 +161,18 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
   }
   eval(insert_dot(expr), envir = list(. = input), enclos = buffer_env)
 }
+
+
+has_dt <- function(expr) {
+  is.call(expr) && identical(expr[[1]], quote(`[`)) &&
+    (identical(expr[[2]], quote(.dt)) || has_dt(expr[[2]]))
+}
+
+has_tb <- function(expr) {
+  is.call(expr) && identical(expr[[1]], quote(`[`)) &&
+    (identical(expr[[2]], quote(.tb)) || has_tb(expr[[2]]))
+}
+
 
 has_if <- function(expr) {
   is.call(expr) && identical(expr[[1]], quote(`if`))
