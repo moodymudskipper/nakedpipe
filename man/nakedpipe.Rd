@@ -65,18 +65,6 @@ calls and their execution times.
 step, it gives the  same output as the standard \verb{\%.\%} pipe. See also
 \code{?side_effect}.
 }
-
-The prefix \verb{~~} can be used with any of the above for side effects.
-
-We can have conditional steps using \code{if} \verb{else} statements, the condition can
-use the dot and if no else clause is given the input will be returned.
-\itemize{
-\item \verb{\%..\%} requires explicit dots and is faster and more adapted to programming,
-it doesn't support \verb{~~}. It's the bare version of \verb{\%.\%}, which makes it the
-\strong{bare-naked pipe}.
-\item \verb{\%<..\%} is the \strong{bare-naked assignment pipe}, it works like \verb{\%..\%} but
-assigns the result back to the input variable.
-}
 }
 \examples{
 

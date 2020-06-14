@@ -21,10 +21,28 @@
 #'   step, it gives the  same output as the standard `%.%` pipe. See also
 #'   `?side_effect`.
 #'
-#' The prefix `~~` can be used with any of the above for side effects.
+#' @section side effects
+#'
+#' The prefix `~~` can be used with any of the above for side effects. If an assignment
+#' is used after `~~` (e.g. `~~ foo <- bar(.)`), the target of the assignment will be
+#' located in the calling environment of the pipe, unless the target variable is dotted
+#' (e.g `~~ .foo <- bar(.)`), in which case it will only be available during the pipe call,
+#' and not copied to the calling environment.
+#'
+#' @section data manipulation shorthands
+#'
+#' 2 widely used data manipulation functions are `subset()` and `transform()` (or
+#' their well known counterparts in the package `dplyr`, `filter()` and `mutate()`),
+#' `nakedpipe` offers shorthands to use those.
+#' For instance instead of `cars %.% {subset(speed > 22) ; transform(time = dist/speed)}`
+#' you can simply type `cars %.% {speed > 22; time = dist/speed}`, nakedpipe will
+#' recognize as a transformation a call to `=`, and as a subset a call to
+#' `<`, `>`, `<=`, `>=`, `==`, `!=`, or `%in%`.
+#'
+#' @section conditional steps
 #'
 #' We can have conditional steps using `if` `else` statements, the condition can
-#' use the dot and if no else clause is given the input will be returned.
+#' use the dot and if no else clause is given the unmodified input will be returned.
 #'
 #' - `%..%` requires explicit dots and is faster and more adapted to programming,
 #' it doesn't support `~~`. It's the bare version of `%.%`, which makes it the
