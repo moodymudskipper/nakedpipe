@@ -5,6 +5,7 @@
 #'
 #' @export
 setup_nakedpipe_snippets <- function(){
+  # nocov start
   snips <- "
 snippet ..
 \t%..% {
@@ -25,4 +26,5 @@ snippet .
           "by typing `.` or `..` followed by 2 quick presses on the <tab> key.")
   },silent = TRUE)
   try(file.edit("~/.R/snippets/r.snippets"), silent = TRUE)
+  # nocov end
 }

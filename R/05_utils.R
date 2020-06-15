@@ -221,36 +221,36 @@ has_scalar_logic <- function(expr) {
       identical(expr[[1]], quote(`||`)))
 }
 
-writeToClipboard  <- function(x) {
-  ## from pacman package
-
-  OS <- Sys.info()["sysname"]
-
-  if (!(OS %in% c("Darwin", "Windows", "Linux"))) {
-    stop("Copying to clipboard not supported on your OS")
-  }
-
-  if (OS != "Windows") {
-    writeClipboard <- NULL
-  }
-
-  switch(
-    OS,
-    "Darwin" = {j <- pipe("pbcopy", "w")
-    writeLines(x, con = j)
-    close(j)
-    },
-    "Windows" = writeClipboard(x, format = 1),
-    "Linux" = {
-      if (Sys.which("xclip") == "") {
-        warning("Clipboard on Linux requires 'xclip'. Try using:\nsudo apt-get install xclip")
-      }
-      con <- pipe("xclip -i", "w")
-      writeLines(x, con = con)
-      close(con)
-    }
-  )
-}
+# writeToClipboard  <- function(x) {
+#   ## from pacman package
+#
+#   OS <- Sys.info()["sysname"]
+#
+#   if (!(OS %in% c("Darwin", "Windows", "Linux"))) {
+#     stop("Copying to clipboard not supported on your OS")
+#   }
+#
+#   if (OS != "Windows") {
+#     writeClipboard <- NULL
+#   }
+#
+#   switch(
+#     OS,
+#     "Darwin" = {j <- pipe("pbcopy", "w")
+#     writeLines(x, con = j)
+#     close(j)
+#     },
+#     "Windows" = writeClipboard(x, format = 1),
+#     "Linux" = {
+#       if (Sys.which("xclip") == "") {
+#         warning("Clipboard on Linux requires 'xclip'. Try using:\nsudo apt-get install xclip")
+#       }
+#       con <- pipe("xclip -i", "w")
+#       writeLines(x, con = con)
+#       close(con)
+#     }
+#   )
+# }
 
 
 

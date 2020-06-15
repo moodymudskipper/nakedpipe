@@ -1,6 +1,7 @@
 #' @export
 #' @rdname nakedpipe
 `%V.%` <- function(x, expr) {
+  # nocov start
   header <- deparse(substitute(x))
   header[length(header)] <- paste(header[length(header)],  "%V.% {")
   lapply(header, message)
@@ -19,12 +20,14 @@
     , args)
   message("}")
   res
+  # nocov end
 }
 
 
 #' @export
 #' @rdname nakedpipe
 `%<V.%` <- function(x, expr) {
+  # nocov start
   header <- deparse(substitute(x))
   header[length(header)] <- paste(header[length(header)],  "%<V.% {")
   lapply(header, message)
@@ -44,4 +47,5 @@
   message("}")
   assign(as.character(substitute(x)), res, envir = parent.frame())
   invisible(res)
+  # nocov end
 }

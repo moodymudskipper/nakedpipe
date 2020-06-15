@@ -91,7 +91,7 @@ side_effect <- function(expr){
   if (!identical(
     eval.parent(quote(match.call())),
     quote(nakedpipe_debugger())))
-    stop("`side_effect()` should only be called inside `nakedpipe_debugger()`!")
+    stop("`side_effect()` should only be called inside `nakedpipe_debugger()`!") # nocov
   pf <- parent.frame(3)
   # evaluate
   env <- new.env()

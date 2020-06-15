@@ -88,7 +88,7 @@ np_assignment_pipes <- c("%<..%","%<.%", "%<L.%", "%<V.%", "%<P.")
 mg_pipes <- c("%>%", "%$%", "%T>%", "+")
 
 toggle <- function() {
-
+  # nocov start
   context <- rstudioapi::getSourceEditorContext()
   selection <- rstudioapi::primary_selection(context)[["text"]]
   selection_lng <- str2lang(selection)
@@ -117,6 +117,7 @@ toggle <- function() {
     stop("select proper nakedpipe or magrittr call to use this functionality", call. = FALSE)
   }
   rstudioapi::modifyRange(context$selection[[c(1,1)]], txt, context$id)
+  # nocov end
 }
 
 nakedpipe_to_magrittr <- function(selection_lng, is_assignment, assign_op, assign_target){

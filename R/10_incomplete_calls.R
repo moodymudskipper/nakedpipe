@@ -1,4 +1,5 @@
 run_incomplete_call <- function() {
+  # nocov start
 
   context <- rstudioapi::getSourceEditorContext()
   selection <- rstudioapi::primary_selection(context)[["text"]]
@@ -7,4 +8,5 @@ run_incomplete_call <- function() {
     selection <- paste0(selection, "\n}")
 
   rstudioapi::sendToConsole(selection,execute = T)
+  # nocov end
 }
