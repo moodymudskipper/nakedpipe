@@ -55,18 +55,19 @@ connect_np_steps_with_magrittr <- function(x,y) {
       return(res)
     }
 
-    if (has_tb(y)) {
-      warning("Be cautious when translating a neked pipe using the `.tb[...]` feature, you might lose class information")
-      if(!identical(y[[2]], quote(.tb))) {
-        # if we have a tb call with multiple brackets .dt[...][...]
-        y <- call("{",y)
-      }
-      y <- do.call("substitute", list(y, list(.tb = quote(.))))
-      res <- call("%>%", x, quote(tb::as_tb()))
-      res <- call("%>%", res, y)
-      res <- call("%>%", res, quote(as.data.frame()))
-      return(res)
-    }
+    # since tb is not on CRAN
+    # if (has_tb(y)) {
+    #   warning("Be cautious when translating a neked pipe using the `.tb[...]` feature, you might lose class information")
+    #   if(!identical(y[[2]], quote(.tb))) {
+    #     # if we have a tb call with multiple brackets .dt[...][...]
+    #     y <- call("{",y)
+    #   }
+    #   y <- do.call("substitute", list(y, list(.tb = quote(.))))
+    #   res <- call("%>%", x, quote(tb::as_tb()))
+    #   res <- call("%>%", res, y)
+    #   res <- call("%>%", res, quote(as.data.frame()))
+    #   return(res)
+    # }
   }
 
   if(y_fun_chr == "~") {
@@ -121,6 +122,7 @@ toggle <- function() {
 }
 
 nakedpipe_to_magrittr <- function(selection_lng, is_assignment, assign_op, assign_target){
+  . <- NULL # to avoid a cmd check note
 
   pipe_chr <- deparse(selection_lng[[1]])
 
@@ -170,6 +172,7 @@ nakedpipe_to_magrittr <- function(selection_lng, is_assignment, assign_op, assig
 }
 
 magrittr_to_nakedpipe <- function(selection_lng, is_assignment, assign_op, assign_target){
+  . <- NULL # to avoid a cmd check note
 
   pipe_chr <- deparse(selection_lng[[1]])
   steps <- list()
@@ -189,8 +192,6 @@ magrittr_to_nakedpipe <- function(selection_lng, is_assignment, assign_op, assig
       selection_lng <- selection_lng[[2]]
       next
     }
-      # stop("a magrittr pipe chain containing side effects (`%T>%`) cannot be converted",
-      #      call. = FALSE)
 
     if(pipe_chr == "%$%") {
       steps <- c(call("with",selection_lng[[3]]), steps)

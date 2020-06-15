@@ -2,6 +2,7 @@
 #' @rdname nakedpipe
 `%V.%` <- function(x, expr) {
   # nocov start
+  View <- NULL # to avoid a cmd check note
   header <- deparse(substitute(x))
   header[length(header)] <- paste(header[length(header)],  "%V.% {")
   lapply(header, message)
@@ -28,6 +29,7 @@
 #' @rdname nakedpipe
 `%<V.%` <- function(x, expr) {
   # nocov start
+  View <- NULL # to avoid a cmd check note
   header <- deparse(substitute(x))
   header[length(header)] <- paste(header[length(header)],  "%<V.% {")
   lapply(header, message)

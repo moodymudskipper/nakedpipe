@@ -7,6 +7,6 @@
 setup_nakedpipe_snippets()
 }
 \description{
-Places snippet definitions in the pastebin and opens in the editor the
+Prints snippet definitions and attempts to open in the editor the
 snippet file to modify.
 }

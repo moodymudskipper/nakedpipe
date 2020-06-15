@@ -16,5 +16,9 @@ BugReports: https://github.com/moodymudskipper/nakedpipe/issues
 Suggests: 
     testthat (>= 2.1.0),
     covr,
-    dplyr
+    dplyr,
+    data.table,
+    rstudioapi
 Roxygen: list(markdown = TRUE)
+Imports: 
+    stats

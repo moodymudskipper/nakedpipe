@@ -37,15 +37,16 @@
         return(expr)
       }
 
-      if (has_tb(expr)) {
-        expr <- bquote({
-          .tb <- tb::as_tb(.)
-          .tb <- .(expr)
-          class(.tb) <- class(.)
-          . <- .tb
-        })
-        return(expr)
-      }
+      # since tb is not on CRAN
+      # if (has_tb(expr)) {
+      #   expr <- bquote({
+      #     .tb <- tb::as_tb(.)
+      #     .tb <- .(expr)
+      #     class(.tb) <- class(.)
+      #     . <- .tb
+      #   })
+      #   return(expr)
+      # }
 
       if (has_if(expr)) {
         expr[[3]] <- insert_dot(expr[[3]])

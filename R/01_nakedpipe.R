@@ -22,7 +22,7 @@
 #'   reproduces how the standard pipe works. See also
 #'   `?side_effect`.
 #'
-#' @section side effects
+#' @section side effects:
 #'
 #' The prefix `~~` can be used with any of the above for side effects. If an assignment
 #' is used after `~~` (e.g. `~~ foo <- bar(.)`), the target of the assignment will be
@@ -30,7 +30,7 @@
 #' (e.g `~~ .foo <- bar(.)`), in which case it will only be available during the pipe call,
 #' and not copied to the calling environment.
 #'
-#' @section data manipulation shorthands
+#' @section data manipulation shorthands:
 #'
 #' 2 widely used data manipulation functions are `subset()` and `transform()` (or
 #' their well known counterparts in the package `dplyr`, `filter()` and `mutate()`),
@@ -40,7 +40,7 @@
 #' recognize as a transformation a call to `=`, and as a subset a call to
 #' `<`, `>`, `<=`, `>=`, `==`, `!=`, or `%in%`.
 #'
-#' @section conditional steps
+#' @section conditional steps:
 #'
 #' We can have conditional steps using `if` `else` statements, the condition can
 #' use the dot and if no else clause is given the unmodified input will be returned.

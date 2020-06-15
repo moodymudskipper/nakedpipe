@@ -17,14 +17,16 @@ X \%sapply..\% expr
 
 X \%lapply..\% expr
 
-dot \%F.\% expr
+. \%F.\% expr
 
-dot \%F..\% expr
+. \%F..\% expr
 }
 \arguments{
 \item{X}{list or vector of element to apply the sequence on}
 
 \item{expr}{call or sequence of calls wrapped inside \code{{}}}
+
+\item{.}{necessarily a dot : \code{.}}
 }
 \description{
 These naked pipes are substitutes or helpers for functionals.

@@ -1,3 +1,4 @@
+#' @importFrom stats setNames terms
 #' @importFrom utils file.edit
 NULL
 
@@ -113,11 +114,13 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
     return(input)
   }
 
+  # no cov start
   if(has_dt(expr)) {
+    .dt <- NULL # to avoid a cmd check note
     if (!is.data.frame(input))
-      stop("lhs must be a data frame")
+      stop("lhs must be a data frame", quietly = TRUE)
     class_ <- class(input)
-    if(!requireNamespace("data.table"))
+    if(!requireNamespace("data.table", quietly = TRUE))
       stop("You must have the package 'data.table' installed to use the feature `.dt[...]` in a nakedpipe call")
     assign(".dt", data.table::as.data.table(input), envir = buffer_env)
     res <- eval(expr, envir = list(. = input), enclos = buffer_env)
@@ -126,18 +129,21 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
     return(res)
   }
 
-  if(has_tb(expr)) {
-    if (!is.data.frame(input))
-      stop("lhs must be a data frame")
-    class_ <- class(input)
-    if(!requireNamespace("tb"))
-      stop("You must have the package 'tb' installed to use the feature `.dt[...]` in a nakedpipe call")
-    assign(".tb", tb::as_tb(input), envir = buffer_env)
-    res <- eval(expr, envir = list(. = input), enclos = buffer_env)
-    rm(.tb, envir = buffer_env)
-    class(res) <- class_
-    return(res)
-  }
+  # since tb is not on CRAN
+  # if(has_tb(expr)) {
+  #   if (!is.data.frame(input))
+  #     stop("lhs must be a data frame")
+  #   class_ <- class(input)
+  #   if(!requireNamespace("tb"))
+  #     stop("You must have the package 'tb' installed to use the feature `.dt[...]` in a nakedpipe call")
+  #   assign(".tb", tb::as_tb(input), envir = buffer_env)
+  #   res <- eval(expr, envir = list(. = input), enclos = buffer_env)
+  #   rm(.tb, envir = buffer_env)
+  #   class(res) <- class_
+  #   return(res)
+  # }
+
+  # nocov end
 
   if(has_equal(expr)){
     if(has_tilde(expr[[3]])){
@@ -251,6 +257,3 @@ has_scalar_logic <- function(expr) {
 #     }
 #   )
 # }
-
-
-

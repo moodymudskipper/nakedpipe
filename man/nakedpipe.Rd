@@ -67,6 +67,42 @@ reproduces how the standard pipe works. See also
 \code{?side_effect}.
 }
 }
+\section{side effects}{
+
+
+The prefix \verb{~~} can be used with any of the above for side effects. If an assignment
+is used after \verb{~~} (e.g. \code{~~ foo <- bar(.)}), the target of the assignment will be
+located in the calling environment of the pipe, unless the target variable is dotted
+(e.g \code{~~ .foo <- bar(.)}), in which case it will only be available during the pipe call,
+and not copied to the calling environment.
+}
+
+\section{data manipulation shorthands}{
+
+
+2 widely used data manipulation functions are \code{subset()} and \code{transform()} (or
+their well known counterparts in the package \code{dplyr}, \code{filter()} and \code{mutate()}),
+\code{nakedpipe} offers shorthands to use those.
+For instance instead of \code{cars \%.\% {subset(speed > 22) ; transform(time = dist/speed)}}
+you can simply type \code{cars \%.\% {speed > 22; time = dist/speed}}, nakedpipe will
+recognize as a transformation a call to \code{=}, and as a subset a call to
+\code{<}, \code{>}, \code{<=}, \code{>=}, \code{==}, \code{!=}, or \code{\%in\%}.
+}
+
+\section{conditional steps}{
+
+
+We can have conditional steps using \code{if} \verb{else} statements, the condition can
+use the dot and if no else clause is given the unmodified input will be returned.
+\itemize{
+\item \verb{\%..\%} requires explicit dots and is faster and more adapted to programming,
+it doesn't support \verb{~~}. It's the bare version of \verb{\%.\%}, which makes it the
+\strong{bare-naked pipe}.
+\item \verb{\%<..\%} is the \strong{bare-naked assignment pipe}, it works like \verb{\%..\%} but
+assigns the result back to the input variable.
+}
+}
+
 \examples{
 
 # Pipe into a sequence of calls using `\%.\%`

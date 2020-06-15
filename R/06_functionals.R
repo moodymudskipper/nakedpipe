@@ -14,6 +14,7 @@
 #'
 #' @param X list or vector of element to apply the sequence on
 #' @param expr call or sequence of calls wrapped inside `{}`
+#' @param . necessarily a dot : `.`
 #' @export
 #' @rdname nakedpipe_functionals
 `%lapply.%` <- function(X, expr) {
@@ -40,8 +41,8 @@
 
 #' @export
 #' @rdname nakedpipe_functionals
-`%F.%` <- function(dot, expr) {
-  if(!identical(substitute(dot), quote(.))) stop("The lhs of `%F.%` must be `.`")
+`%F.%` <- function(., expr) {
+  if(!identical(substitute(.), quote(.))) stop("The lhs of `%F.%` must be `.`")
   as.function(c(
     alist(.=),
     do.call(substitute, list(sys.call(), list(`%F.%` = quote(`%.%`))))))
@@ -49,8 +50,8 @@
 
 #' @export
 #' @rdname nakedpipe_functionals
-`%F..%` <- function(dot, expr) {
-  if(!identical(substitute(dot), quote(.))) stop("The lhs of `%F..%` must be `.`")
+`%F..%` <- function(., expr) {
+  if(!identical(substitute(.), quote(.))) stop("The lhs of `%F..%` must be `.`")
   as.function(c(
     alist(.=),
     do.call(substitute, list(sys.call(), list(`%F..%` = quote(`%..%`))))))
