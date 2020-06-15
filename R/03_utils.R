@@ -80,6 +80,8 @@ has_scalar_logic <- function(expr) {
       identical(expr[[1]], quote(`||`)))
 }
 
+as_tb <- getFromNamespace("as_tb", "tb")
+
 # writeToClipboard  <- function(x) {
 #   ## from pacman package
 #

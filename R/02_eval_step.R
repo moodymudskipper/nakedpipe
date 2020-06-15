@@ -105,19 +105,20 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
     return(res)
   }
 
-  # since tb is not on CRAN
-  # if(has_tb(expr)) {
-  #   if (!is.data.frame(input))
-  #     stop("lhs must be a data frame")
-  #   class_ <- class(input)
-  #   if(!requireNamespace("tb"))
-  #     stop("You must have the package 'tb' installed to use the feature `.dt[...]` in a nakedpipe call")
-  #   assign(".tb", tb::as_tb(input), envir = buffer_env)
-  #   res <- eval(expr, envir = list(. = input), enclos = buffer_env)
-  #   rm(.tb, envir = buffer_env)
-  #   class(res) <- class_
-  #   return(res)
-  # }
+  if(has_tb(expr)) {
+    .tb <- NULL # to avoid a cmd check note
+    if (!is.data.frame(input))
+      stop("lhs must be a data frame")
+    class_ <- class(input)
+    ## comment until tb is on CRAN
+    # if(!requireNamespace("tb"))
+    #   stop("You must have the package 'tb' installed to use the feature `.dt[...]` in a nakedpipe call")
+    assign(".tb", as_tb(input), envir = buffer_env)
+    res <- eval(expr, envir = list(. = input), enclos = buffer_env)
+    rm(.tb, envir = buffer_env)
+    class(res) <- class_
+    return(res)
+  }
 
   # nocov end
 
