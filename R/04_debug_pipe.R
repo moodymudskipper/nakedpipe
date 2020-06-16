@@ -39,12 +39,14 @@
         expr <- bquote({
           .dt <- data.table::as.data.table(.)
           .dt <- .(expr)
+          data.table::setDF(.dt)
           class(.dt) <- class(.)
           . <- .dt
           })
         return(expr)
       }
 
+      # nocov start
       if (has_tb(expr)) {
         expr <- bquote({
           .tb <- as_tb(.)
@@ -54,6 +56,7 @@
         })
         return(expr)
       }
+      # nocov end
 
       if (has_if(expr)) {
         expr[[3]] <- insert_dot(expr[[3]])

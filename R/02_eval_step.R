@@ -101,6 +101,7 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
     assign(".dt", data.table::as.data.table(input), envir = buffer_env)
     res <- eval(expr, envir = list(. = input), enclos = buffer_env)
     rm(.dt, envir = buffer_env)
+    data.table::setDF(res)
     class(res) <- class_
     return(res)
   }
