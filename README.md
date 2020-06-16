@@ -32,11 +32,11 @@ remotes::install_github("moodymudskipper/nakedpipe")
 library(nakedpipe)
 ```
 
-Pipe into a sequence of calls using `%.%`
+Pipe into a sequence of calls using `%.%`:
 
 ``` r
 cars %.% {
-  head(2)
+  subset(speed < 6)
   transform(time = dist/speed)
 }
 #>   speed dist time
@@ -44,20 +44,20 @@ cars %.% {
 #> 2     4   10  2.5
 ```
 
-It plays well with left to right assignment
+It plays well with left to right assignment:
 
 ``` r
 cars %.% {
-  head(2)
+  subset(speed < 6)
   transform(time = dist/speed)
 } -> res
 ```
 
-Use `~~` for side effects
+Use `~~` for side effects:
 
 ``` r
 cars %.% {
-  head(2)
+  subset(speed < 6)
   ~~ message("nrow:", nrow(.))
   transform(time = dist/speed)
 }
@@ -67,11 +67,11 @@ cars %.% {
 #> 2     4   10  2.5
 ```
 
-This include assignments
+This include assignments:
 
 ``` r
 cars %.% {
-  head(2)
+  subset(speed < 6)
   ~~ cars_h <- . # or ~~ . -> cars_h
   transform(time = dist/speed)
 }
@@ -84,12 +84,12 @@ cars_h
 #> 2     4   10
 ```
 
-To assign to a temp variable, use a dotted name
+To assign to a temp variable, use a dotted name:
 
 ``` r
 cars %.% {
-  ~~ .n <- 2
-  head(.n)
+  ~~ .n <- 6
+  subset(speed < .n)
   transform(time = dist/speed)
 }
 #>   speed dist time
@@ -100,11 +100,11 @@ exists(".n")
 ```
 
 Use `if` for conditional step. if the condition is not TRUE and there is
-no `else` clause the data is unchanged.
+no `else` clause the data is unchanged:
 
 ``` r
 cars %.% {
-  head(2)
+  subset(speed < 6)
   if(ncol(.) < 5) transform(time = dist/speed)
 }
 #>   speed dist time
@@ -112,12 +112,51 @@ cars %.% {
 #> 2     4   10  2.5
 
 cars %.% {
-  head(2)
+  subset(speed < 6)
   if(ncol(.) > 5) transform(time = dist/speed)
 }
 #>   speed dist
 #> 1     4    2
 #> 2     4   10
+```
+
+for the very common `subset()` and `transform()` operations, shorthands
+are available, so that for our first exaple we could simply write:
+
+``` r
+cars %.% {
+  speed < 6 # any call to < > <= >= == != %in% & | is interpreted as a subset call
+  time = dist/speed # any call to = is interpreted as a transform call
+}
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+```
+
+We can use *data.table* syntax for one step by using `.dt[...]`, the
+output will be of the same class of the input (the temporary conversion
+to *data.table* is invisible):
+
+``` r
+cars %.% {
+  speed < 8
+  time = dist/speed
+  .dt[, .(mmean_time = mean(time)), by = speed]
+}
+#>   speed mmean_time
+#> 1     4   1.500000
+#> 2     7   1.857143
+```
+
+We can chain *data.table* brackets too:
+
+``` r
+cars %.% {
+  .dt[speed < 8][, time := dist/speed][,.(mmean_time = mean(time)), by = speed]
+}
+#>   speed mmean_time
+#> 1     4   1.500000
+#> 2     7   1.857143
 ```
 
 ## Additional pipes
@@ -152,7 +191,7 @@ cars %L.% {
 #>       0       0       0
 #>   ~~Sys.sleep(1)
 #>    user  system elapsed 
-#>    0.00    0.00    1.01
+#>       0       0       1
 #>   transform(time = dist/speed)
 #>    user  system elapsed 
 #>       0       0       0
@@ -251,7 +290,8 @@ replicate(2, cars, simplify = FALSE) %lapply.% {
 #> 2     4   10  2.5
 ```
 
-See `?"%.%"` and `?"%lapply.%"` to see all available pipes.
+See `?"%.%"` and `?"%lapply.%"` to see all available pipes (including
+variants of the above).
 
 ## Debugging
 
@@ -371,10 +411,10 @@ bench::mark(iterations = 10000,
 #> # A tibble: 4 x 6
 #>   expression      min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 %>%         106.4us  132.2us     5830.     118KB     12.9
-#> 2 %.%          59.2us   73.6us    10703.      280B     15.0
-#> 3 %..%         20.5us     25us    37715.        0B     15.1
-#> 4 base          2.2us    2.5us   304932.        0B      0
+#> 1 %>%         101.2us  111.4us     8405.     118KB     19.4
+#> 2 %.%          85.4us   94.9us     9286.      280B     24.2
+#> 3 %..%         18.7us   20.2us    45959.        0B     23.0
+#> 4 base          1.8us      2us   459924.        0B      0
 ```
 
 ## Snippets

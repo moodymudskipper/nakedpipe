@@ -40,70 +40,100 @@ remotes::install_github("moodymudskipper/nakedpipe")
 library(nakedpipe)
 ```
 
-Pipe into a sequence of calls using `%.%`
+Pipe into a sequence of calls using `%.%`:
 
 ```{r}
 cars %.% {
-  head(2)
+  subset(speed < 6)
   transform(time = dist/speed)
 }
 ```
 
-It plays well with left to right assignment
+It plays well with left to right assignment:
 
 ```{r}
 cars %.% {
-  head(2)
+  subset(speed < 6)
   transform(time = dist/speed)
 } -> res
 ```
 
-Use `~~` for side effects
+Use `~~` for side effects:
 
 ```{r}
 cars %.% {
-  head(2)
+  subset(speed < 6)
   ~~ message("nrow:", nrow(.))
   transform(time = dist/speed)
 }
 ```
 
-This include assignments
+This include assignments:
 
 ```{r}
 cars %.% {
-  head(2)
+  subset(speed < 6)
   ~~ cars_h <- . # or ~~ . -> cars_h
   transform(time = dist/speed)
 }
 cars_h
 ```
 
-To assign to a temp variable, use a dotted name
+To assign to a temp variable, use a dotted name:
 
 ```{r}
 cars %.% {
-  ~~ .n <- 2
-  head(.n)
+  ~~ .n <- 6
+  subset(speed < .n)
   transform(time = dist/speed)
 }
 exists(".n")
 ```
 
 Use `if` for conditional step. if the condition is not TRUE and there is no
-`else` clause the data is unchanged.
+`else` clause the data is unchanged:
 
 ```{r}
 cars %.% {
-  head(2)
+  subset(speed < 6)
   if(ncol(.) < 5) transform(time = dist/speed)
 }
 
 cars %.% {
-  head(2)
+  subset(speed < 6)
   if(ncol(.) > 5) transform(time = dist/speed)
 }
 
+```
+
+for the very common `subset()` and `transform()` operations, shorthands are
+available, so that for our first exaple we could simply write:
+
+```{r}
+cars %.% {
+  speed < 6 # any call to < > <= >= == != %in% & | is interpreted as a subset call
+  time = dist/speed # any call to = is interpreted as a transform call
+}
+```
+
+We can use *data.table* syntax for one step by using `.dt[...]`, the output
+will be of the same class of the input (the temporary conversion to *data.table*
+is invisible):
+
+```{r}
+cars %.% {
+  speed < 8
+  time = dist/speed
+  .dt[, .(mmean_time = mean(time)), by = speed]
+}
+```
+
+We can chain *data.table* brackets too: 
+
+```{r}
+cars %.% {
+  .dt[speed < 8][, time := dist/speed][,.(mmean_time = mean(time)), by = speed]
+}
 ```
 
 
@@ -190,7 +220,8 @@ replicate(2, cars, simplify = FALSE) %lapply.% {
 }
 ```
 
-See `?"%.%"` and `?"%lapply.%"` to see all available pipes.
+See `?"%.%"` and `?"%lapply.%"` to see all available pipes (including variants of
+the above).
 
 ## Debugging
 
