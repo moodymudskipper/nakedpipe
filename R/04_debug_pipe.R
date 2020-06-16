@@ -9,13 +9,21 @@
     expr,
     function(expr) {
       if (has_assignment_op(expr)) {
-        if (!has_dbl_tilde(expr[[2]]))
-          stop("Wrong syntax! If you mean to assign as a side effect you should",
-               "use a `~~` prefix")
-        expr[[2]] <- expr[[c(2,2,2)]]
-        if(substr(as.character(expr[[2]]), 1, 1) == ".")
-          return(expr)
-        return(bquote(side_effect(.(expr))))
+        if (has_dbl_tilde(expr[[2]])) {
+          expr[[2]] <- expr[[c(2,2,2)]]
+          if(substr(as.character(expr[[2]]), 1, 1) == ".")
+            return(expr)
+          return(bquote(side_effect(.(expr))))
+        }
+        if (has_dbl_tilde(expr[[3]])) {
+          expr[[3]] <- expr[[c(3,2,2)]]
+          if(substr(as.character(expr[[2]]), 1, 1) == ".")
+            return(expr)
+          return(bquote(side_effect(.(expr))))
+        }
+
+        stop("Wrong syntax! If you mean to assign as a side effect you should",
+             "use a `~~` prefix")
       }
       if (has_dbl_tilde(expr)) {
         expr <- expr[[c(2,2)]]
@@ -80,10 +88,14 @@
 #' This function should only be called inside `nakedpipe_debugger()`, which is
 #' created and run when calling `%D.%`. You will
 #' find it there to transcribe the side effects prefixed by `~~` in the pipe.
-#' It acts as if it evaluates its argument in the calling environment of the
+#'
+#' `side_effect()` acts as if it evaluates its argument in the calling environment of the
 #' pipe, but making the current value of the dot available. If an assignment is
 #' used inside `side_effect()` a variable will be created or modified in the
 #' calling environment of the pipe.
+#'
+#' @return the value of `.` in the calling environment before `side_effect()`
+#' was called.
 #'
 #' @param expr expr
 #' @export
@@ -95,8 +107,9 @@ side_effect <- function(expr){
   pf <- parent.frame(3)
   # evaluate
   env <- new.env()
-  env$. <- eval.parent(quote(.))
+  dot_val <- eval.parent(quote(.))
+  env$. <- dot_val
   eval(substitute(expr), envir = env, enclos = pf)
   list2env(x = as.list(env), envir = pf)
-  invisible()
+  dot_val
 }
