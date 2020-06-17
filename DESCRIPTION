@@ -19,7 +19,8 @@ Suggests:
     dplyr,
     magrittr,
     data.table,
-    rstudioapi
+    rstudioapi,
+    remotes
 Roxygen: list(markdown = TRUE)
 Imports: 
     stats
