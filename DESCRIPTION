@@ -1,6 +1,6 @@
 Package: nakedpipe
 Title: Pipe into a Sequence of Calls Without Repeating the Pipe Symbol
-Version: 0.0.0.9001
+Version: 0.1.0
 Authors@R: 
     person(given = "Antoine",
            family = "Fabri",
