@@ -9,11 +9,17 @@ side_effect(expr)
 \arguments{
 \item{expr}{expr}
 }
+\value{
+the value of \code{.} in the calling environment before \code{side_effect()}
+was called.
+}
 \description{
 This function should only be called inside \code{nakedpipe_debugger()}, which is
 created and run when calling \verb{\%D.\%}. You will
 find it there to transcribe the side effects prefixed by \verb{~~} in the pipe.
-It acts as if it evaluates its argument in the calling environment of the
+}
+\details{
+\code{side_effect()} acts as if it evaluates its argument in the calling environment of the
 pipe, but making the current value of the dot available. If an assignment is
 used inside \code{side_effect()} a variable will be created or modified in the
 calling environment of the pipe.

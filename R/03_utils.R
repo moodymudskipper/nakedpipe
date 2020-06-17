@@ -1,5 +1,5 @@
 #' @importFrom stats setNames terms
-#' @importFrom utils file.edit
+#' @importFrom utils file.edit getFromNamespace
 NULL
 
 # insert dot at the relevant place following magrittr conventions
