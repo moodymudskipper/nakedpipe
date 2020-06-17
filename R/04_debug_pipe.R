@@ -3,8 +3,13 @@
 `%D.%` <- function(x, expr){
   pf <- parent.frame()
   #dot_backup <- if (exists(".", pf)) get(".", pf) else substitute()
+
   expr <- substitute(expr)
-  if (!is.call(expr)) expr <- list(expr) else expr <- as.list(expr)[-1]
+
+  if (is.call(expr) && identical(expr[[1]], quote(`{`)))
+    expr <- as.list(expr)[-1] else
+      expr <- list(expr)
+
   body <- lapply(
     expr,
     function(expr) {

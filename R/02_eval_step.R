@@ -97,7 +97,7 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
       stop("lhs must be a data frame", quietly = TRUE)
     class_ <- class(input)
     if(!requireNamespace("data.table", quietly = TRUE))
-      stop("You must have the package 'data.table' installed to use the feature `.dt[...]` in a nakedpipe call")
+      stop("You must have the package 'data.table' installed to use the feature `.dt[...]` in a nakedpipe call") # nocov
     assign(".dt", data.table::as.data.table(input), envir = buffer_env)
     res <- eval(expr, envir = list(. = input), enclos = buffer_env)
     rm(.dt, envir = buffer_env)

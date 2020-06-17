@@ -24,9 +24,8 @@ Pipe into a sequence of calls without repeating the pipe symbol.
 
 This is inspired by Stefan Bache and Hadley Wickham's *magrittr* pipe and behaves consistently, though it doesn't use its code. 
 
-The approach of *nakedpipe* spares typing and visual space, the package also
-proposes some convenient logging and debugging features and is a bit more
-performant than its dressed counterpart.
+The approach of *nakedpipe* spares typing and visual space, the syntax also allowed
+for the development of many other features.
 
 Install with :
 

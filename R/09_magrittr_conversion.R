@@ -73,7 +73,13 @@ connect_np_steps_with_magrittr <- function(x,y) {
   if(y_fun_chr == "~") {
     warning(paste("converting side effects between magrittr and nakedpipe syntax is",
             "not guaranteed to always work as they deal differently with environments."))
+    # remove double tilde
     y <- y[[c(2,2)]]
+    #
+    if(!is.call(y) || (
+      !identical(y[[1]], quote(`{`)) &&
+      !identical(insert_dot(y), y)))
+      y <- call("{", y)
     return(call("%T>%", x, y))
   }
 
@@ -187,6 +193,14 @@ magrittr_to_nakedpipe <- function(selection_lng, is_assignment, assign_op, assig
       warning(paste("converting side effects between magrittr and nakedpipe syntax is",
                     "not guaranteed to always work as they deal differently with environments."))
       step <- insert_dot(selection_lng[[3]])
+
+      is_single_bracketed_call <-
+        is.call(step) &&
+        identical(step[[1]], quote(`{`)) &&
+        length(step[[2]]) == 2
+
+      if(is_single_bracketed_call)
+        step <- step[[2]]
       step <- call("~",call("~",step))
       steps <- c(step, steps)
       selection_lng <- selection_lng[[2]]

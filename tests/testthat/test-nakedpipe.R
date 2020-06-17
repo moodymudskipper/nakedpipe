@@ -35,6 +35,48 @@ test_that("naked pipe works on symbols", {
     cars %..% head)
 })
 
+test_that("shorthands work", {
+  # subset
+  expect_identical(
+    cars %.% subset(speed > 3),
+    cars %.% {speed > 3})
+  # wrong subset
+  expect_error(cars %.% {TRUE && TRUE})
+  # transform
+  expect_identical(
+    cars %.% transform(a = 1),
+    cars %.% {a = 1})
+  # aggregation (undocumented)
+  expect_identical(
+    aggregate(speed ~ dist, cars, max),
+    cars %.% {speed = max(speed) ~ dist})
+  expect_identical(
+    aggregate(speed ~ dist, cars, max)[[2]],
+    cars %.% {max(speed) ~ dist; .[[2]]})
+  # renaming (undocumented)
+  `:=` <- NULL # for covr
+  expect_identical(
+    data.frame(a=1),
+    data.frame(b=1) %.% {a := b})
+})
+
+test_that(".dt works", {
+  expect_identical(
+    cars %.% {.[1:2]},
+    cars %.% {.dt[1:2]})
+  # wrong subset
+  expect_error(1 %.% {.dt[1:2]}, "data frame")
+})
+
+test_that(".tb works", {
+  expect_identical(
+    cars %.% {a = 1},
+    cars %.% {.tb[a = 1]})
+  # wrong subset
+  expect_error(1 %.% {.tb[a=1]}, "data frame")
+})
+
+
 suppressWarnings(library(dplyr, warn.conflicts = FALSE,quietly = TRUE, verbose = FALSE))
 test_that("naked pipe works in functions with lazy evaluation and quasiquotation", {
   max_by1 <- function(data, var, by) {
@@ -197,7 +239,7 @@ test_that("functionals work", {
     as.list(toupper(letters)))
 })
 
-test_that("functional sequencescwork", {
+test_that("functional sequences work", {
   expect_identical((. %F.% toupper)("a"), "A")
   expect_identical((. %F..% toupper(.))("a"), "A")
   expect_error((foo %F.% toupper)("a"))
@@ -208,4 +250,4 @@ test_that("functional sequencescwork", {
 test_that("side_effect() fails when called outside of debugger",
           expect_error(side_effect("foo")))
 
-# test_that("setup_nakedpipe_snippets doesn't fail", setup_nakedpipe_snippets())
+

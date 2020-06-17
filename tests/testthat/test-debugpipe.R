@@ -4,6 +4,7 @@ test_that("standard debug pipe works", {
     transform(time = dist/speed)
   },
   transform(head(cars,2), time = dist/speed))
+  expect_identical(cars %D.% head(2), head(cars, 2))
 })
 
 
