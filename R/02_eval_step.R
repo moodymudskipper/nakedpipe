@@ -90,7 +90,7 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
     return(input)
   }
 
-  # no cov start
+  # nocov start
   if(has_dt(expr)) {
     .dt <- NULL # to avoid a cmd check note
     if (!is.data.frame(input))

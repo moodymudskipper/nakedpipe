@@ -68,13 +68,13 @@ test_that(".dt works", {
   expect_error(1 %.% {.dt[1:2]}, "data frame")
 })
 
-test_that(".tb works", {
-  expect_identical(
-    cars %.% {a = 1},
-    cars %.% {.tb[a = 1]})
-  # wrong subset
-  expect_error(1 %.% {.tb[a=1]}, "data frame")
-})
+# test_that(".tb works", {
+#   expect_identical(
+#     cars %.% {a = 1},
+#     cars %.% {.tb[a = 1]})
+#   # wrong subset
+#   expect_error(1 %.% {.tb[a=1]}, "data frame")
+# })
 
 
 suppressWarnings(library(dplyr, warn.conflicts = FALSE,quietly = TRUE, verbose = FALSE))

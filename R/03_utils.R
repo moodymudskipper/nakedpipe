@@ -80,9 +80,11 @@ has_scalar_logic <- function(expr) {
       identical(expr[[1]], quote(`||`)))
 }
 
+# nocov start
 as_tb <- function(x){
   getFromNamespace("as_tb", "tb")(x)
 }
+# nocov end
 
 # writeToClipboard  <- function(x) {
 #   ## from pacman package

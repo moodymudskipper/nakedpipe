@@ -130,6 +130,11 @@ test_that("magrittr_to_nakedpipe works", {
     "iris %.% {\n  ~~print(.)\n}")
 
   expect_identical(
+    suppressWarnings(magrittr_to_nakedpipe(quote(
+      iris %T>% {message("a")}), FALSE)),
+    "iris %.% {\n  ~~message(\"a\")\n}")
+
+  expect_identical(
     magrittr_to_nakedpipe(quote(
       iris %$% Species), FALSE),
     "iris %.% {\n  with(Species)\n}")
