@@ -1,5 +1,5 @@
 Package: nakedpipe
-Title: Pipe Into a Sequence of Calls Without Repeating the Pipe Symbol
+Title: Pipe into a Sequence of Calls Without Repeating the Pipe Symbol
 Version: 0.0.0.9001
 Authors@R: 
     person(given = "Antoine",
@@ -18,9 +18,9 @@ Suggests:
     covr,
     dplyr,
     magrittr,
-    data.table,
     rstudioapi,
     remotes
 Roxygen: list(markdown = TRUE)
 Imports: 
-    stats
+    stats,
+    data.table
