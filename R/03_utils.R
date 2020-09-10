@@ -86,6 +86,25 @@ as_tb <- function(x){
 }
 # nocov end
 
+
+# pull out of a call all calls to target
+call_pull <- function(expr, target = quote(`?`)) {
+  if(!is.call(expr)) return(NULL)
+  if(identical(expr[[1]], target)) return(expr[[2]])
+  unlist(lapply(expr, call_pull))
+}
+
+# replace calls to target with chosen calls
+call_sub <- function(expr, target = quote(`?`), replacement) {
+  if(is.list(replacement)) {
+    return(lapply(replacement, call_sub, expr = expr, target = target))
+  }
+  if(!is.call(expr)) return(expr)
+  if(identical(expr[[1]], target)) return(replacement)
+  expr[] <- lapply(expr, call_sub, replacement = replacement)
+  expr
+}
+
 # writeToClipboard  <- function(x) {
 #   ## from pacman package
 #
@@ -116,3 +135,12 @@ as_tb <- function(x){
 #     }
 #   )
 # }
+
+
+# copy of methods::allNames
+allNames <- function (x) {
+  value <- names(x)
+  if (is.null(value))
+    character(length(x))
+  else value
+}

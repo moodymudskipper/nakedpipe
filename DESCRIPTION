@@ -10,7 +10,7 @@ Description: Pipe into a sequence of calls without repeating the pipe symbol.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 URL: https://github.com/moodymudskipper/nakedpipe
 BugReports: https://github.com/moodymudskipper/nakedpipe/issues
 Suggests: 
@@ -19,7 +19,8 @@ Suggests:
     dplyr,
     magrittr,
     rstudioapi,
-    remotes
+    remotes,
+    glue
 Roxygen: list(markdown = TRUE)
 Imports: 
     stats,

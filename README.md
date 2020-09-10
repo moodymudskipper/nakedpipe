@@ -14,27 +14,44 @@ coverage](https://codecov.io/gh/moodymudskipper/nakedpipe/branch/master/graph/ba
 Pipe into a sequence of calls without repeating the pipe symbol.
 
 This is inspired by Stefan Bache and Hadley Wickham’s *magrittr* pipe
-and behaves consistently, though it doesn’t use its code.
+and behaves mostly consistently.
 
-The approach of *nakedpipe* spares typing and visual space, the package
-also proposes some convenient logging and debugging features and is a
-bit more performant than its dressed counterpart.
+*nakedpipe* calls are more compact, and are intended to be more
+readable, though it’s expected that they will look surprising to new
+users. The syntax allowed the development of many additional features
+that cannot be implemented as ergonomically with *magrittr*.
 
-Install with :
+An instant translation addin between *magrittr* and *nakedpipe* is
+included.
+
+It’s not yet on *CRAN* so you should install with :
 
 ``` r
 remotes::install_github("moodymudskipper/nakedpipe")
 ```
 
-## Examples
+## General principles
+
+A basic *{nakedpipe}* call looks a lot like a *{magrittr}* pipe chain,
+except that the piping symbol is not repeated, and that we surround the
+calls with `{}`
+
+*{magrittr}* syntax :
+
+``` r
+library(magrittr)
+cars %>%
+  subset(speed < 6) %>%
+  transform(time = dist/speed)
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+```
+
+*{nakedpipe}* syntax :
 
 ``` r
 library(nakedpipe)
-```
-
-Pipe into a sequence of calls using `%.%`:
-
-``` r
 cars %.% {
   subset(speed < 6)
   transform(time = dist/speed)
@@ -44,6 +61,9 @@ cars %.% {
 #> 2     4   10  2.5
 ```
 
+The dot insertion rules are identical to the ones used by *{magrittr}*,
+and likewise if we surround a step in `{}`, no dot will be inserted.
+
 It plays well with left to right assignment:
 
 ``` r
@@ -52,6 +72,19 @@ cars %.% {
   transform(time = dist/speed)
 } -> res
 ```
+
+Additional features include :
+
+  - Side effects, using `~~`, similar to ``magrittr::`%T>%``
+  - Temporary assignments and assignments to the calling environment
+  - Shorthands for most common data manipulation operations, namely
+    `subset()`, `transform()` and grouped transformations.
+  - Conditional steps using `if`
+  - Possibility to use *{data.table}* syntax for one step
+  - Additional pipes to debug, assign in place, print or clock each
+    step…
+
+## Side effects and assignments
 
 Use `~~` for side effects:
 
@@ -67,7 +100,7 @@ cars %.% {
 #> 2     4   10  2.5
 ```
 
-This include assignments:
+This include assignments :
 
 ``` r
 cars %.% {
@@ -99,6 +132,23 @@ exists(".n")
 #> [1] FALSE
 ```
 
+## Data manipulation shorthands
+
+For the very common `subset()` and `transform()` operations, shorthands
+are available, so that for our first example we could simply write:
+
+``` r
+cars %.% {
+  speed < 6 # any call to < > <= >= == != %in% & | is interpreted as a subset call
+  time = dist/speed # any call to = is interpreted as a transform call
+}
+#>   speed dist time
+#> 1     4    2  0.5
+#> 2     4   10  2.5
+```
+
+## Conditional steps
+
 Use `if` for conditional step. if the condition is not TRUE and there is
 no `else` clause the data is unchanged:
 
@@ -120,18 +170,7 @@ cars %.% {
 #> 2     4   10
 ```
 
-for the very common `subset()` and `transform()` operations, shorthands
-are available, so that for our first exaple we could simply write:
-
-``` r
-cars %.% {
-  speed < 6 # any call to < > <= >= == != %in% & | is interpreted as a subset call
-  time = dist/speed # any call to = is interpreted as a transform call
-}
-#>   speed dist time
-#> 1     4    2  0.5
-#> 2     4   10  2.5
-```
+## Use *data.table* syntax
 
 We can use *data.table* syntax for one step by using `.dt[...]`, the
 output will be of the same class of the input (the temporary conversion
@@ -376,9 +415,10 @@ Text](https://user-images.githubusercontent.com/18351714/84393270-add85b80-abfb-
 
 ## Benchmark
 
-We’re a bit faster than *magrittr*, if you want to be even faster use
-`%..%` with explicit dots, though keep in mind these are micro seconds
-and that the fastest solution is always not to use pipes at all.
+We’re a bit faster than *{magrittr} 1.5*, if you want to be even faster
+use `%..%` with explicit dots. Note that *magrittr*’s upcoming version
+is much faster than both, though keep in mind these are micro seconds
+and that the fastest solution is always not to use pipes at all
 
 ``` r
 library(magrittr)
@@ -411,10 +451,10 @@ bench::mark(iterations = 10000,
 #> # A tibble: 4 x 6
 #>   expression      min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 %>%         101.2us  111.4us     8405.     118KB     19.4
-#> 2 %.%          85.4us   94.9us     9286.      280B     24.2
-#> 3 %..%         18.7us   20.2us    45959.        0B     23.0
-#> 4 base          1.8us      2us   459924.        0B      0
+#> 1 %>%           4.8us    5.6us   120227.        0B     12.0
+#> 2 %.%         117.8us  127.8us     6231.      280B     23.1
+#> 3 %..%         24.9us   26.9us    32824.        0B     19.7
+#> 4 base          2.2us    2.5us   327740.        0B      0
 ```
 
 ## Snippets
@@ -437,12 +477,18 @@ cars %.% {
 
 (or type `..` to get the `%..%` equivalent)
 
-## Similar efforts
+## Aknowledgements and similar efforts
 
-*nakedpipe* is heavily inspired by *magrittr* and follows the same dot
-insertion rules.
+*{nakedpipe}* is heavily inspired by *{magrittr}* and follows the same
+dot insertion rules.
+
+The functions from `*{dplyr}*` and the *tidyverse* in general had a big
+influence on `*{nakedpipe}*`.
+
+*{data.table}* is the package behind the `.dt[...]` syntax described
+above.
 
 Alternative pipes are available on *CRAN*, at the time of writing and to
-my knowlege, in packages *wrapr* and *pipeR*. The latter includes a
+my knowledge, in packages *wrapr* and *pipeR*. The latter includes a
 function `pipeline()` that allows piping a sequence of calls in a
-similar fashion as *nakedpipe*
+similar fashion as *nakedpipe*.

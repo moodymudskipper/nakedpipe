@@ -34,6 +34,10 @@
         expr <- expr[[c(2,2)]]
         return(bquote(side_effect(.(expr))))
       }
+      if(has_tilde(expr) && length(expr) == 3) {
+        expr <- as.call(c(quote(compute_by_group), expr[[2]], expr[[3]]))
+      }
+
       if (has_equal(expr)) {
         expr <- as.call(c(quote(transform), setNames(list(expr[[3]]), as.character(expr[[2]]))))
       }

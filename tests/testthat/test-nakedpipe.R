@@ -52,7 +52,7 @@ test_that("shorthands work", {
     cars %.% {speed = max(speed) ~ dist})
   expect_identical(
     aggregate(speed ~ dist, cars, max)[[2]],
-    cars %.% {max(speed) ~ dist; .[[2]]})
+    cars %.% {{max(speed)} ~ dist; .[[2]]})
   # renaming (undocumented)
   `:=` <- NULL # for covr
   expect_identical(

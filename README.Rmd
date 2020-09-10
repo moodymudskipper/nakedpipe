@@ -22,31 +22,47 @@ knitr::opts_chunk$set(
 
 Pipe into a sequence of calls without repeating the pipe symbol.
 
-This is inspired by Stefan Bache and Hadley Wickham's *magrittr* pipe and behaves consistently, though it doesn't use its code. 
+This is inspired by Stefan Bache and Hadley Wickham's *magrittr* pipe and behaves 
+mostly consistently. 
 
-The approach of *nakedpipe* spares typing and visual space, the syntax also allowed
-for the development of many other features.
+*nakedpipe* calls are more compact, and are intended to be more readable, 
+though it's expected that they will look surprising to new users.
+The syntax allowed the development of many additional features that cannot be
+implemented as ergonomically with *magrittr*.
 
-Install with :
+An instant translation addin between *magrittr* and *nakedpipe* is included.
+
+It's not yet on *CRAN* so you should install with :
 
 ``` r
 remotes::install_github("moodymudskipper/nakedpipe")
 ```
+## General principles
 
-## Examples
+A basic *{nakedpipe}* call looks a lot like a *{magrittr}* pipe chain, except that the
+piping symbol is not repeated, and that we surround the calls with `{}`
+
+*{magrittr}* syntax : 
+
+```{r}
+library(magrittr)
+cars %>%
+  subset(speed < 6) %>%
+  transform(time = dist/speed)
+```
+
+*{nakedpipe}* syntax : 
 
 ```{r}
 library(nakedpipe)
-```
-
-Pipe into a sequence of calls using `%.%`:
-
-```{r}
 cars %.% {
   subset(speed < 6)
   transform(time = dist/speed)
 }
 ```
+
+The dot insertion rules are identical to the ones used by *{magrittr}*, and likewise
+if we surround a step in `{}`, no dot will be inserted.
 
 It plays well with left to right assignment:
 
@@ -56,6 +72,19 @@ cars %.% {
   transform(time = dist/speed)
 } -> res
 ```
+
+Additional features include : 
+
+
+* Side effects, using `~~`, similar to ```magrittr::`%T>%```
+* Temporary assignments and assignments to the calling environment
+* Shorthands for most common data manipulation operations, namely `subset()`,
+`transform()` and grouped transformations.
+* Conditional steps using `if`
+* Possibility to use *{data.table}* syntax for one step
+* Additional pipes to debug, assign in place, print or clock each step...
+
+## Side effects and assignments
 
 Use `~~` for side effects:
 
@@ -67,7 +96,7 @@ cars %.% {
 }
 ```
 
-This include assignments:
+This include assignments :
 
 ```{r}
 cars %.% {
@@ -89,6 +118,20 @@ cars %.% {
 exists(".n")
 ```
 
+## Data manipulation shorthands
+
+For the very common `subset()` and `transform()` operations, shorthands are
+available, so that for our first example we could simply write:
+
+```{r}
+cars %.% {
+  speed < 6 # any call to < > <= >= == != %in% & | is interpreted as a subset call
+  time = dist/speed # any call to = is interpreted as a transform call
+}
+```
+
+## Conditional steps
+
 Use `if` for conditional step. if the condition is not TRUE and there is no
 `else` clause the data is unchanged:
 
@@ -102,18 +145,9 @@ cars %.% {
   subset(speed < 6)
   if(ncol(.) > 5) transform(time = dist/speed)
 }
-
 ```
 
-for the very common `subset()` and `transform()` operations, shorthands are
-available, so that for our first exaple we could simply write:
-
-```{r}
-cars %.% {
-  speed < 6 # any call to < > <= >= == != %in% & | is interpreted as a subset call
-  time = dist/speed # any call to = is interpreted as a transform call
-}
-```
+## Use *data.table* syntax
 
 We can use *data.table* syntax for one step by using `.dt[...]`, the output
 will be of the same class of the input (the temporary conversion to *data.table*
@@ -301,9 +335,10 @@ We provide an addin to ease the conversion.
 
 ## Benchmark
 
-We're a bit faster than *magrittr*, if you want to be even faster use `%..%` with
-explicit dots, though keep in mind these are micro seconds and that the fastest
-solution is always not to use pipes at all.
+We're a bit faster than *{magrittr} 1.5*, if you want to be even faster use `%..%` with
+explicit dots. Note that *magrittr*'s upcoming version is much faster than both, 
+though keep in mind these are micro seconds and that the fastest
+solution is always not to use pipes at all
 
 ```{r}
 library(magrittr)
@@ -354,11 +389,18 @@ cars %.% {
 
 (or type `..` to get the `%..%` equivalent)
 
-## Similar efforts
+## Aknowledgements and similar efforts
 
-*nakedpipe* is heavily inspired by *magrittr* and follows the same dot insertion
-rules.
+*{nakedpipe}* is heavily inspired by *{magrittr}* and follows the same dot insertion
+rules. 
 
-Alternative pipes are available on *CRAN*, at the time of writing and to my knowlege,
+The functions from `*{dplyr}*` and the *tidyverse* in general had a big
+influence on `*{nakedpipe}*`.
+
+*{data.table}* is the package behind the `.dt[...]` syntax described above.
+
+Alternative pipes are available on *CRAN*, at the time of writing and to my knowledge,
 in packages *wrapr* and *pipeR*. The latter includes a function `pipeline()` that
-allows piping a sequence of calls in a similar fashion as *nakedpipe*
+allows piping a sequence of calls in a similar fashion as *nakedpipe*.
+
+

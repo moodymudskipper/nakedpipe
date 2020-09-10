@@ -43,7 +43,7 @@ connect_np_steps_with_magrittr <- function(x,y) {
 
   if(y_fun_chr == "[") {
     if (has_dt(y)) {
-      warning("Be cautious when translating a neked pipe using the `.dt[...]` feature, you might lose class information")
+      warning("Be cautious when translating a naked pipe using the `.dt[...]` feature, you might lose class information")
       if(!identical(y[[2]], quote(.dt))) {
         # if we have a data.table call with multiple brackets .dt[...][...]
         y <- call("{",y)
@@ -71,16 +71,20 @@ connect_np_steps_with_magrittr <- function(x,y) {
   }
 
   if(y_fun_chr == "~") {
-    warning(paste("converting side effects between magrittr and nakedpipe syntax is",
-            "not guaranteed to always work as they deal differently with environments."))
-    # remove double tilde
-    y <- y[[c(2,2)]]
-    #
-    if(!is.call(y) || (
-      !identical(y[[1]], quote(`{`)) &&
-      !identical(insert_dot(y), y)))
-      y <- call("{", y)
-    return(call("%T>%", x, y))
+    if(length(y) == 3) {
+      y <- as.call(c(quote(compute_by_group), y[[2]], y[[3]]))
+    } else {
+      warning(paste("converting side effects between magrittr and nakedpipe syntax is",
+                    "not guaranteed to always work as they deal differently with environments."))
+      # remove double tilde
+      y <- y[[c(2,2)]]
+      #
+      if(!is.call(y) || (
+        !identical(y[[1]], quote(`{`)) &&
+        !identical(insert_dot(y), y)))
+        y <- call("{", y)
+      return(call("%T>%", x, y))
+    }
   }
 
   call("%>%", x, y)

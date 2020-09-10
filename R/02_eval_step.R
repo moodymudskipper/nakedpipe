@@ -43,6 +43,16 @@ eval_step <-   fun <- function(input, expr, pf, buffer_env) {
     return(input)
   }
 
+  if(has_tilde(expr) && length(expr) == 3) {
+    expr <- as.call(c(
+      quote(compute_by_group),
+      data = quote(.),
+      expr = expr[[2]],
+      by = expr[[3]]))
+    res <- eval(expr, envir = list(. = input), enclos = buffer_env)
+    return(res)
+  }
+
   if (has_if(expr)) {
     cond <- eval(expr[[2]], envir = list(. = input), enclos = buffer_env)
     if(cond) {
