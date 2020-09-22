@@ -344,7 +344,7 @@ cars %D.% {
 }
 ```
 
-You could also inster a browser() call as a side effect at a chosen
+You could also insert a browser() call as a side effect at a chosen
 step.
 
 ``` r
