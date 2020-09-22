@@ -333,12 +333,20 @@ We provide an addin to ease the conversion.
 
 ![Alt Text](https://user-images.githubusercontent.com/18351714/84393270-add85b80-abfb-11ea-8a7d-3ec4c8c59d55.gif)
 
+## Running partial selection
+
+It's easy with standard pipes to run only the first steps of a pipe chain, by
+selecting them and running selected code. With *{nakedpipe}* the closing `}` is
+missing if we do the same. The addin "nakedpipe run incomplete call" allows one
+to run the selection after adding the closing `}`.
+
 ## Benchmark
 
 We're a bit faster than *{magrittr} 1.5*, if you want to be even faster use `%..%` with
 explicit dots. Note that *magrittr*'s upcoming version is much faster than both, 
 though keep in mind these are micro seconds and that the fastest
-solution is always not to use pipes at all
+solution is always not to use pipes at all. See below the benchmark using 
+`{magrittr} 2.0`.
 
 ```{r}
 library(magrittr)

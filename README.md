@@ -230,7 +230,7 @@ cars %L.% {
 #>       0       0       0
 #>   ~~Sys.sleep(1)
 #>    user  system elapsed 
-#>       0       0       1
+#>    0.00    0.00    1.02
 #>   transform(time = dist/speed)
 #>    user  system elapsed 
 #>       0       0       0
@@ -344,7 +344,7 @@ cars %D.% {
 }
 ```
 
-You could also insert a browser() call as a side effect at a chosen
+You could also inster a browser() call as a side effect at a chosen
 step.
 
 ``` r
@@ -413,12 +413,21 @@ We provide an addin to ease the conversion.
 ![Alt
 Text](https://user-images.githubusercontent.com/18351714/84393270-add85b80-abfb-11ea-8a7d-3ec4c8c59d55.gif)
 
+## Running partial selection
+
+It’s easy with standard pipes to run only the first steps of a pipe
+chain, by selecting them and running selected code. With *{nakedpipe}*
+the closing `}` is missing if we do the same. The addin “nakedpipe run
+incomplete call” allows one to run the selection after adding the
+closing `}`.
+
 ## Benchmark
 
 We’re a bit faster than *{magrittr} 1.5*, if you want to be even faster
 use `%..%` with explicit dots. Note that *magrittr*’s upcoming version
 is much faster than both, though keep in mind these are micro seconds
-and that the fastest solution is always not to use pipes at all
+and that the fastest solution is always not to use pipes at all. See
+below the benchmark using `{magrittr} 2.0`.
 
 ``` r
 library(magrittr)
@@ -451,10 +460,10 @@ bench::mark(iterations = 10000,
 #> # A tibble: 4 x 6
 #>   expression      min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 %>%           4.8us    5.6us   120227.        0B     12.0
-#> 2 %.%         117.8us  127.8us     6231.      280B     23.1
-#> 3 %..%         24.9us   26.9us    32824.        0B     19.7
-#> 4 base          2.2us    2.5us   327740.        0B      0
+#> 1 %>%           4.5us    5.1us   161773.        0B     16.2
+#> 2 %.%         113.2us  124.3us     6258.      280B     22.6
+#> 3 %..%         24.4us   27.2us    24060.        0B     14.4
+#> 4 base          2.2us    2.4us   349727.        0B      0
 ```
 
 ## Snippets
