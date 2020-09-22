@@ -119,8 +119,11 @@ side_effect <- function(expr){
   pf <- parent.frame(3)
   # evaluate
   env <- new.env()
-  dot_val <- eval.parent(quote(.))
-  env$. <- dot_val
+  # copy all dotted variables from parent frame to env, incl dot
+  for (var in ls(parent.frame(), all.names = TRUE, pattern = "^\\.")) {
+    env[[var]] <- eval.parent(as.symbol(var))
+  }
+  dot_val <- env$.
   eval(substitute(expr), envir = env, enclos = pf)
   list2env(x = as.list(env), envir = pf)
   dot_val

@@ -20,8 +20,11 @@ Suggests:
     magrittr,
     rstudioapi,
     remotes,
-    glue
+    glue,
+    knitr,
+    rmarkdown
 Roxygen: list(markdown = TRUE)
 Imports: 
     stats,
     data.table
+VignetteBuilder: knitr
