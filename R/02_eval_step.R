@@ -56,11 +56,11 @@ eval_step <- function(input, expr, pf, buffer_env) {
   if (has_if(expr)) {
     cond <- eval(expr[[2]], envir = list(. = input), enclos = buffer_env)
     if(cond) {
-      res <- eval(insert_dot(expr[[3]]), envir = list(. = input), enclos = buffer_env)
+      res <- eval_step(input, expr[[3]], pf, buffer_env)
       return(res)
     } else {
       if(length(expr) == 4) {
-        res <- eval(insert_dot(expr[[4]]), envir = list(. = input), enclos = buffer_env)
+        res <- eval_step(input, expr[[4]], pf, buffer_env)
       } else {
         res <- input
       }
