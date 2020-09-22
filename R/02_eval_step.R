@@ -1,6 +1,6 @@
 # evaluate a single step given an output and expression, dealing with side effects
 # and assignments
-eval_step <-   fun <- function(input, expr, pf, buffer_env) {
+eval_step <- function(input, expr, pf, buffer_env) {
   # we could go a bit faster, we restest each time if expr is a call
   # we can test once first, and modify all our functions so they don't test anymore
 
