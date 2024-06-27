@@ -27,4 +27,3 @@ Roxygen: list(markdown = TRUE)
 Imports: 
     stats,
     data.table
-VignetteBuilder: knitr
