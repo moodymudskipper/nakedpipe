@@ -77,6 +77,7 @@ test_that(".dt works", {
 # })
 
 
+skip_if_not_installed("dplyr")
 suppressWarnings(library(dplyr, warn.conflicts = FALSE,quietly = TRUE, verbose = FALSE))
 test_that("naked pipe works in functions with lazy evaluation and quasiquotation", {
   max_by1 <- function(data, var, by) {
