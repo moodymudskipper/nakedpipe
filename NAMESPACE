@@ -20,7 +20,11 @@ export("%sapply..%")
 export(compute_by_group)
 export(setup_nakedpipe_snippets)
 export(side_effect)
-importFrom(stats,setNames)
-importFrom(stats,terms)
-importFrom(utils,file.edit)
-importFrom(utils,getFromNamespace)
+importFrom(stats,
+  setNames,
+  terms
+)
+importFrom(utils,
+  file.edit,
+  getFromNamespace
+)
